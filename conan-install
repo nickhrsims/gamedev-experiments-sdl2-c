@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+if [[ ! -d build ]]; then mkdir build; fi
+conan install . --output-folder=build --build=missing
