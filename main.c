@@ -21,13 +21,7 @@ typedef struct {
   int pos_x, pos_y;
   int size_x, size_y;
   int vel_x, vel_y;
-} ball_t;
-
-typedef struct {
-  int pos_x, pos_y;
-  int size_x, size_y;
-  int vel_x, vel_y;
-} paddle_t;
+} entity_t;
 
 typedef struct {
   int score;
@@ -56,9 +50,9 @@ typedef struct {
   game_config_t config;
   player_t player_1;
   player_t player_2;
-  paddle_t left_paddle;
-  paddle_t right_paddle;
-  ball_t ball;
+  entity_t left_paddle;
+  entity_t right_paddle;
+  entity_t ball;
 
   uint8_t running;
 } game_t;
@@ -128,20 +122,19 @@ void graphics_reset_color(game_t *game) {
 /**
  * Draw ball.
  */
-void graphics_draw_ball(game_t *game) {
-  ball_t *ball = &game->ball;
-  SDL_RenderFillRect(game->resources.renderer, &(SDL_Rect){.x = ball->pos_x,
-                                                           .y = ball->pos_y,
-                                                           .w = ball->size_x,
-                                                           .h = ball->size_y});
+void _graphics_draw_entity(game_t *game, entity_t *e) {
+  SDL_RenderFillRect(game->resources.renderer, &(SDL_Rect){.x = e->pos_x,
+                                                           .y = e->pos_y,
+                                                           .w = e->size_x,
+                                                           .h = e->size_y});
   return;
 }
 
-/**
- * Draw paddles.
- * FIXME: Not implemented.
- */
-void graphics_draw_paddles(game_t *game) { return; }
+void graphics_draw_entities(game_t *game) {
+  _graphics_draw_entity(game, &game->ball);
+  _graphics_draw_entity(game, &game->left_paddle);
+  _graphics_draw_entity(game, &game->right_paddle);
+}
 
 /**
  * Graphics Processing Block
@@ -149,8 +142,7 @@ void graphics_draw_paddles(game_t *game) { return; }
 void graphics_process(game_t *game) {
   graphics_clear(game);
   graphics_set_color(game, 255, 255, 255, 255);
-  graphics_draw_ball(game);
-  graphics_draw_paddles(game);
+  graphics_draw_entities(game);
   graphics_reset_color(game);
   graphics_show(game);
 
@@ -165,7 +157,7 @@ void graphics_process(game_t *game) {
  * Move the ball based on velocity.
  */
 void physics_move_ball(game_t *game, float delta) {
-  ball_t *ball = &game->ball;
+  entity_t *ball = &game->ball;
   ball->pos_x += ball->vel_x * delta;
   ball->pos_y += ball->vel_y * delta;
 }
@@ -174,7 +166,7 @@ void physics_move_ball(game_t *game, float delta) {
  * Check collision between ball and edges.
  */
 void physics_check_collision_with_edges(game_t *game) {
-  ball_t *ball = &game->ball;
+  entity_t *ball = &game->ball;
 
   // TODO: Use of config does not support resize.
   uint16_t floor = game->config.window_size_y;
@@ -260,7 +252,7 @@ game_t *game_init(game_config_t config) {
   // --- Initialize Entity Properties
 
   { // Ball
-    ball_t *b = &game->ball;
+    entity_t *b = &game->ball;
     b->pos_x = -128;
     b->pos_y = -128;
     b->size_x = 16;
@@ -270,7 +262,7 @@ game_t *game_init(game_config_t config) {
   }
 
   { // Left Paddle
-    paddle_t *p = &game->left_paddle;
+    entity_t *p = &game->left_paddle;
     p->pos_x = 128;
     p->pos_y = 64;
     p->size_x = 8;
@@ -278,7 +270,7 @@ game_t *game_init(game_config_t config) {
   }
 
   { // Right Paddle
-    paddle_t *p = &game->left_paddle;
+    entity_t *p = &game->left_paddle;
     p->pos_x = (game->config.window_size_x) - 128;
     p->pos_y = 64;
     p->size_x = 8;
