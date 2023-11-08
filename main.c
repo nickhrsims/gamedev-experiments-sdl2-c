@@ -7,13 +7,6 @@
 #include "SDL_video.h"
 #include "log.h"
 
-static char const *const WINDOW_TITLE = "Pong";
-static uint16_t const WINDOW_X = 32;
-static uint16_t const WINDOW_Y = 32;
-
-static uint16_t const WINDOW_W = 640;
-static uint16_t const WINDOW_H = 480;
-
 // -----------------------------------------------------------------------------
 //
 //     Data Definitions
