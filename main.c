@@ -270,7 +270,7 @@ game_t *game_init(game_config_t config) {
   }
 
   { // Right Paddle
-    entity_t *p = &game->left_paddle;
+    entity_t *p = &game->right_paddle;
     p->pos_x = (game->config.window_size_x) - 128;
     p->pos_y = 64;
     p->size_x = 8;
