@@ -172,8 +172,9 @@ void graphics_process(game_t *game) {
  * Move the ball based on velocity.
  */
 void physics_move_entity(entity_t *e, float delta) {
-    e->x += e->vx * delta;
-    e->y += e->vy * delta;
+    // Casting prevents bit overflow observed during testing
+    e->x += (int)(e->vx * delta);
+    e->y += (int)(e->vy * delta);
 }
 
 /**
