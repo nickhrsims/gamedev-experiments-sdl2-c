@@ -281,6 +281,8 @@ game_t *game_init(game_config_t config) {
         p->y        = 64;
         p->w        = 8;
         p->h        = 128; // TODO: Relative size.
+        p->vx       = 0;
+        p->vy       = 0;
     }
 
     { // Right Paddle
@@ -289,6 +291,8 @@ game_t *game_init(game_config_t config) {
         p->y        = 64;
         p->w        = 8;
         p->h        = 128; // TODO: Relative size.
+        p->vx       = 0;
+        p->vy       = 0;
     }
 
     { // Players
