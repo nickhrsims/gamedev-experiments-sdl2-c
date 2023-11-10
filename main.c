@@ -18,9 +18,9 @@
 // -------------------------------------
 
 typedef struct {
-    int pos_x, pos_y;
-    int size_x, size_y;
-    int vel_x, vel_y;
+    int x, y;
+    int w, h;
+    int vx, vy;
 } entity_t;
 
 typedef struct {
@@ -32,26 +32,26 @@ typedef struct {
 // -------------------------------------
 
 typedef struct {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-} sdl_resource_handle_container_t;
+    SDL_Window *win;
+    SDL_Renderer *ren;
+} game_sdl_res_t;
 
 typedef struct {
-    char *window_title;
-    uint16_t window_pos_x;
-    uint16_t window_pos_y;
-    uint16_t window_size_x;
-    uint16_t window_size_y;
-    uint8_t is_window_fullscreen;
+    char *win_title;
+    uint16_t win_x;
+    uint16_t win_y;
+    uint16_t win_w;
+    uint16_t win_h;
+    uint8_t win_fullscrn;
 } game_config_t;
 
 typedef struct {
-    sdl_resource_handle_container_t resources;
-    game_config_t config;
-    player_t player_1;
+    game_sdl_res_t sdl;
+    game_config_t cfg;
+    player_t p1;
     player_t player_2;
-    entity_t left_paddle;
-    entity_t right_paddle;
+    entity_t lpad;
+    entity_t rpad;
     entity_t ball;
 
     uint8_t running;
@@ -90,7 +90,7 @@ void event_process(game_t *game) {
  * Clear the screen.
  */
 void graphics_clear(game_t *game) {
-    SDL_RenderClear(game->resources.renderer);
+    SDL_RenderClear(game->sdl.ren);
     return;
 }
 
@@ -98,16 +98,15 @@ void graphics_clear(game_t *game) {
  * Display all drawn entities.
  */
 void graphics_show(game_t *game) {
-    SDL_RenderPresent(game->resources.renderer);
+    SDL_RenderPresent(game->sdl.ren);
     return;
 }
 
 /**
  * Set entity draw color.
  */
-void graphics_set_color(game_t *game, uint8_t red, uint8_t green, uint8_t blue,
-                        uint8_t alpha) {
-    SDL_SetRenderDrawColor(game->resources.renderer, red, green, blue, alpha);
+void graphics_set_color(game_t *game, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    SDL_SetRenderDrawColor(game->sdl.ren, r, g, b, a);
     return;
 }
 
@@ -123,16 +122,15 @@ void graphics_reset_color(game_t *game) {
  * Draw ball.
  */
 void _graphics_draw_entity(game_t *game, entity_t *e) {
-    SDL_RenderFillRect(
-        game->resources.renderer,
-        &(SDL_Rect){.x = e->pos_x, .y = e->pos_y, .w = e->size_x, .h = e->size_y});
+    SDL_RenderFillRect(game->sdl.ren,
+                       &(SDL_Rect){.x = e->x, .y = e->y, .w = e->w, .h = e->h});
     return;
 }
 
 void graphics_draw_entities(game_t *game) {
     _graphics_draw_entity(game, &game->ball);
-    _graphics_draw_entity(game, &game->left_paddle);
-    _graphics_draw_entity(game, &game->right_paddle);
+    _graphics_draw_entity(game, &game->lpad);
+    _graphics_draw_entity(game, &game->rpad);
 }
 
 /**
@@ -157,8 +155,8 @@ void graphics_process(game_t *game) {
  */
 void physics_move_ball(game_t *game, float delta) {
     entity_t *ball = &game->ball;
-    ball->pos_x += ball->vel_x * delta;
-    ball->pos_y += ball->vel_y * delta;
+    ball->x += ball->vx * delta;
+    ball->y += ball->vy * delta;
 }
 
 /**
@@ -168,25 +166,25 @@ void physics_check_collision_with_edges(game_t *game) {
     entity_t *ball = &game->ball;
 
     // TODO: Use of config does not support resize.
-    uint16_t floor      = game->config.window_size_y;
+    uint16_t floor      = game->cfg.win_h;
     uint16_t ceiling    = 0;
-    uint16_t right_wall = game->config.window_size_x;
+    uint16_t right_wall = game->cfg.win_w;
     uint16_t left_wall  = 0;
 
-    if (ball->pos_x <= left_wall) {
-        ball->vel_x = abs(ball->vel_x);
+    if (ball->x <= left_wall) {
+        ball->vx = abs(ball->vx);
     }
 
-    if (ball->pos_y <= ceiling) {
-        ball->vel_y = abs(ball->vel_y);
+    if (ball->y <= ceiling) {
+        ball->vy = abs(ball->vy);
     }
 
-    if (ball->pos_x + ball->size_x >= right_wall) {
-        ball->vel_x = -abs(ball->vel_x);
+    if (ball->x + ball->w >= right_wall) {
+        ball->vx = -abs(ball->vx);
     }
 
-    if (ball->pos_y + ball->size_y >= floor) {
-        ball->vel_y = -abs(ball->vel_y);
+    if (ball->y + ball->h >= floor) {
+        ball->vy = -abs(ball->vy);
     }
 }
 
@@ -231,53 +229,51 @@ game_t *game_init(game_config_t config) {
     // SDL is initialized with the game instance.
     SDL_Init(SDL_INIT_VIDEO);
 
-    game         = malloc(sizeof(game_t));
-    game->config = config;
+    game      = malloc(sizeof(game_t));
+    game->cfg = config;
 
     // --- SDL2 Resources
 
-    game->resources.window =
-        SDL_CreateWindow(config.window_title, config.window_pos_x, config.window_pos_y,
-                         config.window_size_x, config.window_size_y,
-                         config.is_window_fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
+    game->sdl.win =
+        SDL_CreateWindow(config.win_title, config.win_x, config.win_y, config.win_w,
+                         config.win_h, config.win_fullscrn ? SDL_WINDOW_FULLSCREEN : 0);
 
     // Game has no use for variable index or flags
     int const RENDERER_INDEX = 0;
     int const RENDERER_FLAGS = 0;
 
-    game->resources.renderer =
-        SDL_CreateRenderer(game->resources.window, RENDERER_INDEX, RENDERER_FLAGS);
+    game->sdl.ren = SDL_CreateRenderer(game->sdl.win, RENDERER_INDEX, RENDERER_FLAGS);
 
     // --- Initialize Entity Properties
 
     { // Ball
         entity_t *b = &game->ball;
-        b->pos_x    = -128;
-        b->pos_y    = -128;
-        b->size_x   = 16;
-        b->size_y   = 16;
-        b->vel_x    = 200;
-        b->vel_y    = 200;
+        b->x        = -128;
+        b->y        = -128;
+        b->w        = 16;
+        b->h        = 16;
+        b->vx       = 200;
+        b->vy       = 200;
     }
 
     { // Left Paddle
-        entity_t *p = &game->left_paddle;
-        p->pos_x    = 128;
-        p->pos_y    = 64;
-        p->size_x   = 8;
-        p->size_y   = 128; // TODO: Relative size.
+        entity_t *p = &game->lpad;
+        p->x        = 128;
+        p->y        = 64;
+        p->w        = 8;
+        p->h        = 128; // TODO: Relative size.
     }
 
     { // Right Paddle
-        entity_t *p = &game->right_paddle;
-        p->pos_x    = (game->config.window_size_x) - 128;
-        p->pos_y    = 64;
-        p->size_x   = 8;
-        p->size_y   = 128; // TODO: Relative size.
+        entity_t *p = &game->rpad;
+        p->x        = (game->cfg.win_w) - 128;
+        p->y        = 64;
+        p->w        = 8;
+        p->h        = 128; // TODO: Relative size.
     }
 
     { // Players
-        player_t *p1 = &game->player_1;
+        player_t *p1 = &game->p1;
         player_t *p2 = &game->player_2;
 
         p1->score = 0;
@@ -295,17 +291,23 @@ game_t *game_init(game_config_t config) {
 
 void game_loop(game_t *game) {
 
-    // Simulation Ticks for Delta Calculation
-    uint64_t previous_frame_ticks = SDL_GetTicks64();
-    uint64_t current_frame_ticks  = 0;
+    /** CPU ticks at the start of the last frame. */
+    uint64_t prev_frame_ticks = SDL_GetTicks64();
 
-    // High-Resolution "Counts" for Frame Limiting
-    uint64_t frame_start_hrc = 0;
-    uint64_t frame_end_hrc   = 0;
+    /** CPU ticks at the start of this frame. */
+    uint64_t curr_frame_ticks = 0;
 
-    // Frame Time-Calculation Results
-    float frame_elapsed_ms = 0;
-    float delta            = 0;
+    /** Time at the beginning of the frame. */
+    uint64_t frame_start_time = 0;
+
+    /** Time at the end of the frame. */
+    uint64_t frame_end_time = 0;
+
+    /** Milliseconds this frame has taken. */
+    float elapsed_frame_ms = 0;
+
+    /** Time between frames. Measured in seconds. */
+    float delta = 0;
 
     game->running = 1;
 
@@ -314,9 +316,9 @@ void game_loop(game_t *game) {
 
         // --- Start Frame Timing
 
-        frame_start_hrc     = SDL_GetPerformanceCounter();
-        current_frame_ticks = SDL_GetTicks64();
-        delta               = (current_frame_ticks - previous_frame_ticks) / 1000.0f;
+        frame_start_time = SDL_GetPerformanceCounter();
+        curr_frame_ticks = SDL_GetTicks64();
+        delta            = (curr_frame_ticks - prev_frame_ticks) / 1000.0f;
 
         event_process(game);
         physics_process(game, delta);
@@ -324,24 +326,29 @@ void game_loop(game_t *game) {
 
         // --- End Frame Timing
         //
-        previous_frame_ticks = current_frame_ticks;
-        frame_end_hrc        = SDL_GetPerformanceCounter();
-        frame_elapsed_ms     = (frame_end_hrc - frame_start_hrc) /
+        prev_frame_ticks = curr_frame_ticks;
+        frame_end_time   = SDL_GetPerformanceCounter();
+        elapsed_frame_ms = (frame_end_time - frame_start_time) /
                            (float)SDL_GetPerformanceFrequency() * 1000.0f;
+
+        // 60 FPS in Milliseconds
+        // == 1 (frame) / 60 (seconds) * 1000 (convert to ms)
         static float const FPS60 = 16.666f;
-        SDL_Delay(floor(FPS60 - frame_elapsed_ms));
+
+        // Delay each frame to get as close to 60FPS as possible.
+        SDL_Delay(floor(FPS60 - elapsed_frame_ms));
     }
 
     return;
 }
 
 int main(void) {
-    game_t *game = game_init((game_config_t){.is_window_fullscreen = 0,
-                                             .window_size_x        = 640,
-                                             .window_size_y        = 480,
-                                             .window_pos_x         = 128,
-                                             .window_pos_y         = 128,
-                                             .window_title         = "Pong"});
+    game_t *game = game_init((game_config_t){.win_fullscrn = 0,
+                                             .win_w        = 640,
+                                             .win_h        = 480,
+                                             .win_x        = 128,
+                                             .win_y        = 128,
+                                             .win_title    = "Pong"});
 
     game_loop(game);
 
