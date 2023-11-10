@@ -21,16 +21,16 @@
  * Game Physics Body (Ball, Paddles, etc.)
  */
 typedef struct {
-    int x, y;
-    int w, h;
-    int vx, vy;
+    int16_t x, y;
+    int16_t w, h;
+    int16_t vx, vy;
 } entity_t;
 
 /**
  * Player Data
  */
 typedef struct {
-    int score;
+    uint64_t score;
 } player_t;
 
 // -------------------------------------
@@ -257,8 +257,8 @@ game_t *game_init(game_config_t config) {
                          config.win_h, config.win_fullscrn ? SDL_WINDOW_FULLSCREEN : 0);
 
     // Game has no use for variable index or flags
-    int const RENDERER_INDEX = 0;
-    int const RENDERER_FLAGS = 0;
+    uint8_t const RENDERER_INDEX = 0;
+    uint8_t const RENDERER_FLAGS = 0;
 
     game->sdl.ren = SDL_CreateRenderer(game->sdl.win, RENDERER_INDEX, RENDERER_FLAGS);
 
