@@ -64,7 +64,7 @@ typedef struct {
     game_sdl_res_t sdl;
     game_config_t cfg;
     player_t p1;
-    player_t player_2;
+    player_t p2;
     entity_t lpad;
     entity_t rpad;
     entity_t ball;
@@ -292,7 +292,7 @@ game_t *game_init(game_config_t config) {
 
     { // Players
         player_t *p1 = &game->p1;
-        player_t *p2 = &game->player_2;
+        player_t *p2 = &game->p2;
 
         p1->score = 0;
         p2->score = 0;
