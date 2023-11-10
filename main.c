@@ -171,10 +171,9 @@ void graphics_process(game_t *game) {
 /**
  * Move the ball based on velocity.
  */
-void physics_move_ball(game_t *game, float delta) {
-    entity_t *ball = &game->ball;
-    ball->x += ball->vx * delta;
-    ball->y += ball->vy * delta;
+void physics_move_entity(entity_t *e, float delta) {
+    e->x += e->vx * delta;
+    e->y += e->vy * delta;
 }
 
 /**
@@ -216,7 +215,9 @@ void physics_check_collision_with_paddles(game_t *game) { return; }
  * Physics Processing Block
  */
 void physics_process(game_t *game, float delta) {
-    physics_move_ball(game, delta);
+    physics_move_entity(&game->ball, delta);
+    physics_move_entity(&game->lpad, delta);
+    physics_move_entity(&game->rpad, delta);
     physics_check_collision_with_edges(game);
     physics_check_collision_with_paddles(game);
     return;
