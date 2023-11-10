@@ -17,12 +17,18 @@
 // Entities
 // -------------------------------------
 
+/**
+ * Game Physics Body (Ball, Paddles, etc.)
+ */
 typedef struct {
     int x, y;
     int w, h;
     int vx, vy;
 } entity_t;
 
+/**
+ * Player Data
+ */
 typedef struct {
     int score;
 } player_t;
@@ -31,11 +37,17 @@ typedef struct {
 // Core System Structures
 // -------------------------------------
 
+/**
+ * SDL2 Resource Container
+ */
 typedef struct {
     SDL_Window *win;
     SDL_Renderer *ren;
 } game_sdl_res_t;
 
+/**
+ * Game Configuration Parameters
+ */
 typedef struct {
     char *win_title;
     uint16_t win_x;
@@ -45,6 +57,9 @@ typedef struct {
     uint8_t win_fullscrn;
 } game_config_t;
 
+/**
+ * Game Instance Data
+ */
 typedef struct {
     game_sdl_res_t sdl;
     game_config_t cfg;
@@ -119,7 +134,7 @@ void graphics_reset_color(game_t *game) {
 }
 
 /**
- * Draw ball.
+ * Draw specific entity.
  */
 void _graphics_draw_entity(game_t *game, entity_t *e) {
     SDL_RenderFillRect(game->sdl.ren,
@@ -127,6 +142,9 @@ void _graphics_draw_entity(game_t *game, entity_t *e) {
     return;
 }
 
+/**
+ * Draw all entities of given game instance.
+ */
 void graphics_draw_entities(game_t *game) {
     _graphics_draw_entity(game, &game->ball);
     _graphics_draw_entity(game, &game->lpad);
@@ -134,7 +152,7 @@ void graphics_draw_entities(game_t *game) {
 }
 
 /**
- * Graphics Processing Block
+ * Perform all graphics operations of a single frame.
  */
 void graphics_process(game_t *game) {
     graphics_clear(game);
@@ -289,6 +307,9 @@ game_t *game_init(game_config_t config) {
     return game;
 }
 
+/**
+ * Primary game operations and timing loop.
+ */
 void game_loop(game_t *game) {
 
     /** CPU ticks at the start of the last frame. */
