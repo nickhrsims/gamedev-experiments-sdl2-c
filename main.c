@@ -282,12 +282,13 @@ game_t *game_init(game_config_t config) {
 
     { // Ball
         entity_t *b = &game->ball;
-        b->x        = -128;
-        b->y        = -128;
-        b->w        = 16;
-        b->h        = 16;
-        b->vx       = 200;
-        b->vy       = 200;
+        // Place ball in center of screen.
+        b->x  = game->cfg.win_w / 2;
+        b->y  = game->cfg.win_h / 2;
+        b->w  = 16;
+        b->h  = 16;
+        b->vx = 200;
+        b->vy = 200;
     }
 
     { // Left Paddle
