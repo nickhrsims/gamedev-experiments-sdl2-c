@@ -38,32 +38,32 @@ typedef struct {
  * SDL2 Resource Container
  */
 typedef struct {
-    SDL_Window *win;
-    SDL_Renderer *ren;
-} game_sdl_res_t;
+    SDL_Window *window;
+    SDL_Renderer *renderer;
+} game_sdl_resource_container_t;
 
 /**
  * Game Configuration Parameters
  */
 typedef struct {
-    char *win_title;
-    uint16_t win_x;
-    uint16_t win_y;
-    uint16_t win_w;
-    uint16_t win_h;
-    uint8_t win_fullscrn;
+    char *window_title;
+    uint16_t window_position_x;
+    uint16_t window_position_y;
+    uint16_t window_width;
+    uint16_t window_height;
+    uint8_t window_is_fullscreen;
 } game_config_t;
 
 /**
  * Game Instance Data
  */
 typedef struct {
-    game_sdl_res_t sdl;
-    game_config_t cfg;
-    player_t p1;
-    player_t p2;
-    entity_t lpad;
-    entity_t rpad;
+    game_sdl_resource_container_t sdl;
+    game_config_t config;
+    player_t player_1;
+    player_t player_2;
+    entity_t left_paddle;
+    entity_t right_paddle;
     entity_t ball;
 
     uint8_t running;
@@ -92,20 +92,20 @@ void input_process(game_t *game) {
 
     // Left Paddle (A: UP, Z: DOWN)
     if (kb[SDL_SCANCODE_A]) {
-        game->lpad.vy = -200;
+        game->left_paddle.vy = -200;
     } else if (kb[SDL_SCANCODE_Z]) {
-        game->lpad.vy = 200;
+        game->left_paddle.vy = 200;
     } else {
-        game->lpad.vy = 0;
+        game->left_paddle.vy = 0;
     }
 
     // Right Paddle (K: UP, M: DOWN)
     if (kb[SDL_SCANCODE_K]) {
-        game->rpad.vy = -200;
+        game->right_paddle.vy = -200;
     } else if (kb[SDL_SCANCODE_M]) {
-        game->rpad.vy = 200;
+        game->right_paddle.vy = 200;
     } else {
-        game->rpad.vy = 0;
+        game->right_paddle.vy = 0;
     }
 
     return;
@@ -119,7 +119,7 @@ void input_process(game_t *game) {
  * Clear the screen.
  */
 void graphics_clear(game_t *game) {
-    SDL_RenderClear(game->sdl.ren);
+    SDL_RenderClear(game->sdl.renderer);
     return;
 }
 
@@ -127,7 +127,7 @@ void graphics_clear(game_t *game) {
  * Display all drawn entities.
  */
 void graphics_show(game_t *game) {
-    SDL_RenderPresent(game->sdl.ren);
+    SDL_RenderPresent(game->sdl.renderer);
     return;
 }
 
@@ -135,7 +135,7 @@ void graphics_show(game_t *game) {
  * Set entity draw color.
  */
 void graphics_set_color(game_t *game, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    SDL_SetRenderDrawColor(game->sdl.ren, r, g, b, a);
+    SDL_SetRenderDrawColor(game->sdl.renderer, r, g, b, a);
     return;
 }
 
@@ -151,7 +151,7 @@ void graphics_reset_color(game_t *game) {
  * Draw specific entity.
  */
 void _graphics_draw_entity(game_t *game, entity_t *e) {
-    SDL_RenderFillRect(game->sdl.ren,
+    SDL_RenderFillRect(game->sdl.renderer,
                        &(SDL_Rect){.x = e->x, .y = e->y, .w = e->w, .h = e->h});
     return;
 }
@@ -161,8 +161,8 @@ void _graphics_draw_entity(game_t *game, entity_t *e) {
  */
 void graphics_draw_entities(game_t *game) {
     _graphics_draw_entity(game, &game->ball);
-    _graphics_draw_entity(game, &game->lpad);
-    _graphics_draw_entity(game, &game->rpad);
+    _graphics_draw_entity(game, &game->left_paddle);
+    _graphics_draw_entity(game, &game->right_paddle);
 }
 
 /**
@@ -198,9 +198,9 @@ void physics_check_collision_with_edges(game_t *game) {
     entity_t *ball = &game->ball;
 
     // TODO: Use of config does not support resize.
-    uint16_t floor      = game->cfg.win_h;
+    uint16_t floor      = game->config.window_height;
     uint16_t ceiling    = 0;
-    uint16_t right_wall = game->cfg.win_w;
+    uint16_t right_wall = game->config.window_width;
     uint16_t left_wall  = 0;
 
     if (ball->x <= left_wall) {
@@ -243,8 +243,8 @@ uint8_t _physics_is_colliding(entity_t *a, entity_t *b) {
 void physics_check_collision_with_paddles(game_t *game) {
 
     entity_t *b  = &game->ball;
-    entity_t *lp = &game->lpad;
-    entity_t *rp = &game->rpad;
+    entity_t *lp = &game->left_paddle;
+    entity_t *rp = &game->right_paddle;
 
     if (_physics_is_colliding(b, lp)) {
         b->vx *= -1;
@@ -260,8 +260,8 @@ void physics_check_collision_with_paddles(game_t *game) {
  */
 void physics_process(game_t *game, float delta) {
     physics_move_entity(&game->ball, delta);
-    physics_move_entity(&game->lpad, delta);
-    physics_move_entity(&game->rpad, delta);
+    physics_move_entity(&game->left_paddle, delta);
+    physics_move_entity(&game->right_paddle, delta);
     physics_check_collision_with_edges(game);
     physics_check_collision_with_paddles(game);
     return;
@@ -292,28 +292,30 @@ game_t *game_init(game_config_t config) {
     // SDL is initialized with the game instance.
     SDL_Init(SDL_INIT_VIDEO);
 
-    game      = malloc(sizeof(game_t));
-    game->cfg = config;
+    game         = malloc(sizeof(game_t));
+    game->config = config;
 
     // --- SDL2 Resources
 
-    game->sdl.win =
-        SDL_CreateWindow(config.win_title, config.win_x, config.win_y, config.win_w,
-                         config.win_h, config.win_fullscrn ? SDL_WINDOW_FULLSCREEN : 0);
+    game->sdl.window = SDL_CreateWindow(
+        config.window_title, config.window_position_x, config.window_position_y,
+        config.window_width, config.window_height,
+        config.window_is_fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
 
     // Game has no use for variable index or flags
     uint8_t const RENDERER_INDEX = 0;
     uint8_t const RENDERER_FLAGS = 0;
 
-    game->sdl.ren = SDL_CreateRenderer(game->sdl.win, RENDERER_INDEX, RENDERER_FLAGS);
+    game->sdl.renderer =
+        SDL_CreateRenderer(game->sdl.window, RENDERER_INDEX, RENDERER_FLAGS);
 
     // --- Initialize Entity Properties
 
     { // Ball
         entity_t *b = &game->ball;
         // Place ball in center of screen.
-        b->x  = game->cfg.win_w / 2;
-        b->y  = game->cfg.win_h / 2;
+        b->x  = game->config.window_width / 2;
+        b->y  = game->config.window_height / 2;
         b->w  = 16;
         b->h  = 16;
         b->vx = 200;
@@ -321,7 +323,7 @@ game_t *game_init(game_config_t config) {
     }
 
     { // Left Paddle
-        entity_t *p = &game->lpad;
+        entity_t *p = &game->left_paddle;
         p->x        = 128;
         p->y        = 64;
         p->w        = 8;
@@ -331,8 +333,8 @@ game_t *game_init(game_config_t config) {
     }
 
     { // Right Paddle
-        entity_t *p = &game->rpad;
-        p->x        = (game->cfg.win_w) - 128;
+        entity_t *p = &game->right_paddle;
+        p->x        = (game->config.window_width) - 128;
         p->y        = 64;
         p->w        = 8;
         p->h        = 128; // TODO: Relative size.
@@ -341,8 +343,8 @@ game_t *game_init(game_config_t config) {
     }
 
     { // Players
-        player_t *p1 = &game->p1;
-        player_t *p2 = &game->p2;
+        player_t *p1 = &game->player_1;
+        player_t *p2 = &game->player_2;
 
         p1->score = 0;
         p2->score = 0;
@@ -414,12 +416,12 @@ void game_loop(game_t *game) {
 }
 
 int main(void) {
-    game_t *game = game_init((game_config_t){.win_fullscrn = 0,
-                                             .win_w        = 640,
-                                             .win_h        = 480,
-                                             .win_x        = 128,
-                                             .win_y        = 128,
-                                             .win_title    = "Pong"});
+    game_t *game = game_init((game_config_t){.window_is_fullscreen = 0,
+                                             .window_width         = 640,
+                                             .window_height        = 480,
+                                             .window_position_x    = 128,
+                                             .window_position_y    = 128,
+                                             .window_title         = "Pong"});
 
     game_loop(game);
 
