@@ -10,7 +10,7 @@ logc = dependency('log.c', version : 'cci.20200620')
 cloveunit = dependency('clove-unit', version : '2.4.1')
 
 exe = executable('pong',
-                 'main.c',
+                 'src/main.c',
                  install : false,
                  dependencies : [sdl2, logc, cloveunit, cmath],
                 )
