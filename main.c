@@ -79,16 +79,33 @@ typedef struct {
 // Events
 // ---------------------------------------------------------
 
-void event_process(game_t *game) {
+void input_process(game_t *game) {
     SDL_Event event;
     SDL_PollEvent(&event);
 
-    switch (event.type) {
-    case SDL_QUIT:
+    uint8_t const *kb = SDL_GetKeyboardState(NULL);
+
+    // Quit Game
+    if (event.type == SDL_QUIT || kb[SDL_SCANCODE_ESCAPE]) {
         game->running = 0;
-        break;
-    default:
-        break;
+    }
+
+    // Left Paddle (A: UP, Z: DOWN)
+    if (kb[SDL_SCANCODE_A]) {
+        game->lpad.vy = -200;
+    } else if (kb[SDL_SCANCODE_Z]) {
+        game->lpad.vy = 200;
+    } else {
+        game->lpad.vy = 0;
+    }
+
+    // Right Paddle (K: UP, M: DOWN)
+    if (kb[SDL_SCANCODE_K]) {
+        game->rpad.vy = -200;
+    } else if (kb[SDL_SCANCODE_M]) {
+        game->rpad.vy = 200;
+    } else {
+        game->rpad.vy = 0;
     }
 
     return;
@@ -344,7 +361,7 @@ void game_loop(game_t *game) {
         curr_frame_ticks = SDL_GetTicks64();
         delta            = (curr_frame_ticks - prev_frame_ticks) / 1000.0f;
 
-        event_process(game);
+        input_process(game);
         physics_process(game, delta);
         graphics_process(game);
 
