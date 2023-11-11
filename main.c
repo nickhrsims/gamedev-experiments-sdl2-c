@@ -80,6 +80,10 @@ typedef struct {
 // ---------------------------------------------------------
 
 void input_process(game_t *game) {
+    uint8_t *is_game_running = &game->running;
+    entity_t *lpad           = &game->left_paddle;
+    entity_t *rpad           = &game->right_paddle;
+
     SDL_Event event;
     SDL_PollEvent(&event);
 
@@ -87,25 +91,25 @@ void input_process(game_t *game) {
 
     // Quit Game
     if (event.type == SDL_QUIT || kb[SDL_SCANCODE_ESCAPE]) {
-        game->running = 0;
+        *is_game_running = 0;
     }
 
     // Left Paddle (A: UP, Z: DOWN)
     if (kb[SDL_SCANCODE_A]) {
-        game->left_paddle.vy = -200;
+        lpad->vy = -200;
     } else if (kb[SDL_SCANCODE_Z]) {
-        game->left_paddle.vy = 200;
+        lpad->vy = 200;
     } else {
-        game->left_paddle.vy = 0;
+        lpad->vy = 0;
     }
 
     // Right Paddle (K: UP, M: DOWN)
     if (kb[SDL_SCANCODE_K]) {
-        game->right_paddle.vy = -200;
+        rpad->vy = -200;
     } else if (kb[SDL_SCANCODE_M]) {
-        game->right_paddle.vy = 200;
+        rpad->vy = 200;
     } else {
-        game->right_paddle.vy = 0;
+        rpad->vy = 0;
     }
 
     return;
