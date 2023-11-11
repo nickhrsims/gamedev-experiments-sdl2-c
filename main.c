@@ -2,9 +2,6 @@
 #include <stdlib.h>
 
 #include "SDL2/SDL.h"
-#include "SDL_render.h"
-#include "SDL_timer.h"
-#include "SDL_video.h"
 #include "log.h"
 
 // -----------------------------------------------------------------------------
