@@ -11,6 +11,9 @@ cloveunit = dependency('clove-unit', version : '2.4.1')
 
 exe = executable('pong',
                  'src/main.c',
+                 'src/game.c',
+                 'src/graphics.c',
+                 'src/physics.c',
                  install : false,
                  dependencies : [sdl2, logc, cloveunit, cmath],
                 )
