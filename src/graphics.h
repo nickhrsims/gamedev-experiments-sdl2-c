@@ -32,3 +32,8 @@ void graphics_draw_entity(game_t *game, entity_t *e);
  * Draw all entities of given game instance.
  */
 void graphics_draw_entities(game_t *game);
+
+/*
+ * Draw text.
+ */
+void graphics_draw_text(game_t *game, char *str, int8_t x, int8_t y);

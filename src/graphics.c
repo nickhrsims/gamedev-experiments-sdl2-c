@@ -37,7 +37,7 @@ void graphics_reset_color(game_t *game) {
 /**
  * Draw specific entity.
  */
-void _graphics_draw_entity(game_t *game, entity_t *e) {
+static void draw_entity(game_t *game, entity_t *e) {
     SDL_RenderFillRect(game->sdl.renderer,
                        &(SDL_Rect){.x = e->x, .y = e->y, .w = e->w, .h = e->h});
     return;
@@ -47,7 +47,20 @@ void _graphics_draw_entity(game_t *game, entity_t *e) {
  * Draw all entities of given game instance.
  */
 void graphics_draw_entities(game_t *game) {
-    _graphics_draw_entity(game, &game->ball);
-    _graphics_draw_entity(game, &game->left_paddle);
-    _graphics_draw_entity(game, &game->right_paddle);
+    draw_entity(game, &game->ball);
+    draw_entity(game, &game->left_paddle);
+    draw_entity(game, &game->right_paddle);
+}
+
+/**
+ * Draw text.
+ */
+void graphics_draw_text(game_t *game, char *str, int8_t x, int8_t y) {
+    SDL_Surface *surface =
+        TTF_RenderText_Solid(game->sdl.font, str, (SDL_Color){255, 255, 255, 255});
+
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(game->sdl.renderer, surface);
+
+    SDL_RenderCopy(game->sdl.renderer, texture, NULL,
+                   &(SDL_Rect){x, y, surface->w, surface->h});
 }
