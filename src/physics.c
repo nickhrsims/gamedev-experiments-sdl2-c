@@ -19,16 +19,16 @@ void physics_check_collision_with_edges(game_t *game) {
     entity_t *ball = &game->ball;
 
     // TODO: Use of config does not support resize.
-    uint16_t floor      = game->config.window_height;
-    uint16_t ceiling    = 0;
-    uint16_t right_wall = game->config.window_width;
-    uint16_t left_wall  = 0;
+    uint16_t left_wall   = 0;
+    uint16_t top_wall    = 0;
+    uint16_t right_wall  = game->config.window_width;
+    uint16_t bottom_wall = game->config.window_height;
 
     if (ball->x <= left_wall) {
         ball->vx = abs(ball->vx);
     }
 
-    if (ball->y <= ceiling) {
+    if (ball->y <= top_wall) {
         ball->vy = abs(ball->vy);
     }
 
@@ -36,7 +36,7 @@ void physics_check_collision_with_edges(game_t *game) {
         ball->vx = -abs(ball->vx);
     }
 
-    if (ball->y + ball->h >= floor) {
+    if (ball->y + ball->h >= bottom_wall) {
         ball->vy = -abs(ball->vy);
     }
 }

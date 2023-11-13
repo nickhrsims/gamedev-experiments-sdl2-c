@@ -87,6 +87,7 @@ game_t *game_init(game_config_t config) {
 
     // SDL is initialized with the game instance.
     SDL_Init(SDL_INIT_VIDEO);
+    TTF_Init();
 
     game         = malloc(sizeof(game_t));
     game->config = config;
@@ -104,6 +105,9 @@ game_t *game_init(game_config_t config) {
 
     game->sdl.renderer =
         SDL_CreateRenderer(game->sdl.window, RENDERER_INDEX, RENDERER_FLAGS);
+
+    // TODO: Generalize font selection
+    game->sdl.font = TTF_OpenFont("res/font.ttf", 24);
 
     // --- Initialize Entity Properties
 

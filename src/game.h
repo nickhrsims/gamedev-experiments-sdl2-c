@@ -1,9 +1,9 @@
 #pragma once
 
+#include "SDL_ttf.h"
 #include <stdint.h>
 
 #include <SDL2/SDL.h>
-
 /**
  * Game Physics Body (Ball, Paddles, etc.)
  */
@@ -26,6 +26,7 @@ typedef struct {
 typedef struct {
   SDL_Window *window;
   SDL_Renderer *renderer;
+  TTF_Font *font;
 } game_sdl_resource_container_t;
 
 /**
