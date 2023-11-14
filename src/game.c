@@ -44,17 +44,6 @@ void input_process(game_t *game) {
 }
 
 /**
- * Physics processing block.
- */
-void physics_process(game_t *game, float delta) {
-    physics_move_entity(&game->ball, delta);
-    physics_move_entity(&game->left_paddle, delta);
-    physics_move_entity(&game->right_paddle, delta);
-    physics_check_collision_with_edges(game);
-    physics_check_collision_with_paddles(game);
-    return;
-}
-/**
  * Graphics processing block.
  */
 void graphics_process(game_t *game) {
@@ -118,8 +107,8 @@ game_t *game_init(game_config_t config) {
         b->y  = game->config.window_height / 2;
         b->w  = 16;
         b->h  = 16;
-        b->vx = 200;
-        b->vy = 200;
+        b->vx = -200;
+        b->vy = -200;
     }
 
     { // Left Paddle
@@ -194,7 +183,7 @@ void game_loop(game_t *game) {
         delta            = (curr_frame_ticks - prev_frame_ticks) / 1000.0f;
 
         input_process(game);
-        physics_process(game, delta);
+        physics_apply(game, delta);
         graphics_process(game);
 
         // --- End Frame Timing
