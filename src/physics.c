@@ -107,14 +107,12 @@ static void apply_collision_to_paddles(game_t *game) {
     entity_t *rpad = &game->right_paddle;
 
     if (is_colliding_with_wall(game, lpad, WALL_TOP)) {
-        puts("TOP");
         set_direction(lpad, DIR_DOWN);
     } else if (is_colliding_with_wall(game, lpad, WALL_BOTTOM)) {
         set_direction(lpad, DIR_UP);
     }
 
     if (is_colliding_with_wall(game, rpad, WALL_TOP)) {
-        puts("TOP");
         set_direction(rpad, DIR_DOWN);
     } else if (is_colliding_with_wall(game, rpad, WALL_BOTTOM)) {
         set_direction(rpad, DIR_UP);
