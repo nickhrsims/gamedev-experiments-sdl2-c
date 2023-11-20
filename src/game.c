@@ -102,6 +102,8 @@ game_t *game_init(game_config_t config) {
 
     // --- Initialize Entity Properties
 
+    // TODO: Abstract out
+
     { // Ball
         entity_t *b = &game->ball;
         // Place ball in center of screen.
