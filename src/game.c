@@ -148,6 +148,9 @@ game_t *game_init(game_config_t config) {
     return game;
 }
 
+
+void rules_apply(game_t *game) {}
+
 /**
  * Primary game operations and timing loop.
  */
@@ -184,6 +187,7 @@ void game_loop(game_t *game) {
 
         input_process(game);
         physics_apply(game, delta);
+        rules_apply(game);
         graphics_process(game);
 
         // --- End Frame Timing
