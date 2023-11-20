@@ -17,7 +17,7 @@ typedef struct {
  * Player Data
  */
 typedef struct {
-  uint64_t score;
+  uint8_t score;
 } player_t;
 
 /**
