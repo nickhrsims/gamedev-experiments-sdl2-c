@@ -55,7 +55,7 @@ void graphics_draw_entities(game_t *game) {
 /**
  * Draw text.
  */
-void graphics_draw_text(game_t *game, char *str, int8_t x, int8_t y) {
+void graphics_draw_text(game_t *game, char *str, int16_t x, int16_t y) {
     SDL_Surface *surface =
         TTF_RenderText_Solid(game->sdl.font, str, (SDL_Color){255, 255, 255, 255});
 
