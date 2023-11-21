@@ -157,6 +157,8 @@ void rules_apply(game_t *game) {}
 
 /**
  * Primary game operations and timing loop.
+ *
+ * TODO: Separate main loop against game loop
  */
 void game_loop(game_t *game) {
 
