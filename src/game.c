@@ -195,7 +195,7 @@ void graphics_process(game_t *game) {
     return;
 }
 
-void rules_block(game_t *game) {
+void rules_process(game_t *game) {
 
     if (is_ball_in_left_goal(game)) {
         // player 2 gets the point
@@ -245,8 +245,8 @@ void game_loop(game_t *game) {
         delta            = (curr_frame_ticks - prev_frame_ticks) / 1000.0f;
 
         input_process(game);
-        physics_apply(game, delta);
-        rules_block(game);
+        physics_process(game, delta);
+        rules_process(game);
         graphics_process(game);
 
         // --- End Frame Timing

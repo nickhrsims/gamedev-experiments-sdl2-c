@@ -123,7 +123,7 @@ static void apply_collision_to_paddles(game_t *game) {
 // Application
 // ---------------------------------------------------------
 
-void physics_apply(game_t *game, float delta) {
+void physics_process(game_t *game, float delta) {
     entity_t *ball = &game->ball;
     entity_t *lpad = &game->left_paddle;
     entity_t *rpad = &game->right_paddle;
