@@ -137,7 +137,7 @@ static void handle_goal(game_t *game, player_t *player) {
 /**
  * Input processing block.
  */
-void input_process(game_t *game) {
+static void input_process(game_t *game) {
     uint8_t *is_game_running = &game->running;
     entity_t *lpad           = &game->left_paddle;
     entity_t *rpad           = &game->right_paddle;
@@ -176,7 +176,7 @@ void input_process(game_t *game) {
 /**
  * Graphics processing block.
  */
-void graphics_process(game_t *game) {
+static void graphics_process(game_t *game) {
     char p1_score_str[3];
     char p2_score_str[3];
 
@@ -195,7 +195,7 @@ void graphics_process(game_t *game) {
     return;
 }
 
-void rules_process(game_t *game) {
+static void rules_process(game_t *game) {
 
     if (is_ball_in_left_goal(game)) {
         // player 2 gets the point
