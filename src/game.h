@@ -1,9 +1,10 @@
 #pragma once
 
-#include "SDL_ttf.h"
 #include <stdint.h>
 
 #include <SDL2/SDL.h>
+#include <SDL_ttf.h>
+
 /**
  * Game Physics Body (Ball, Paddles, etc.)
  */
