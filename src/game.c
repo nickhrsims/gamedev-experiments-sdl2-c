@@ -276,6 +276,8 @@ void game_loop(game_t *game) {
  *
  * Game instance is a singleton, subsequent calls will return the same
  * instance.
+ *
+ * TODO: Should be refactored into smaller stages.
  */
 game_t *game_init(game_config_t config) {
 
