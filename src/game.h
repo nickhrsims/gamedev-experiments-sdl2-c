@@ -55,7 +55,6 @@ typedef struct {
   entity_t ball;
   uint8_t running;
   fsm_state_id_t state;
-  fsm_state_table_t fsm;
 } game_t;
 
 game_t *game_init(game_config_t);
