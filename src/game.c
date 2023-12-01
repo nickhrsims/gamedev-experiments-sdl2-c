@@ -2,9 +2,72 @@
 
 #include <SDL2/SDL.h>
 
+#include <stdint.h>
+
+#include "fsm.h"
 #include "game.h"
 #include "graphics.h"
 #include "physics.h"
+
+// -----------------------------------------------------------------------------
+// Game State-Machine
+// -----------------------------------------------------------------------------
+
+// -------------------------------------
+// States & Triggers
+// -------------------------------------
+
+// States
+enum game_state_enum {
+    INIT_STATE = 1,
+    PLAYING_STATE,
+    GAME_OVER_STATE,
+    TERM_STATE,
+    STATE_COUNT,
+};
+
+// Triggers
+enum game_trigger_enum {
+    INIT_DONE_TRIGGER = 1,
+    GAME_OVER_TRIGGER,
+    ALWAYS_TRIGGER,
+    TRIGGER_COUNT,
+};
+
+// -------------------------------------
+// FSM Configuration
+// -------------------------------------
+static fsm_state_id_t game_state_transition_table[STATE_COUNT][TRIGGER_COUNT] = {
+    [INIT_STATE] =
+        {
+            [INIT_DONE_TRIGGER] = PLAYING_STATE,
+        },
+    [PLAYING_STATE] =
+        {
+            [GAME_OVER_TRIGGER] = GAME_OVER_STATE,
+        },
+    [GAME_OVER_STATE] =
+        {
+            [ALWAYS_TRIGGER] = TERM_STATE,
+        },
+    [TERM_STATE] =
+        {
+            [ALWAYS_TRIGGER] = TERM_STATE,
+
+        },
+};
+
+// -------------------------------------
+// Auxiliary Utilities
+// -------------------------------------
+
+uint64_t get_game_ms(void) { return SDL_GetTicks64(); }
+uint64_t get_elapsed_ms(uint64_t last_ms) { return SDL_GetTicks64() - last_ms; }
+fsm_state_id_t *get_game_state(game_t *game) { return &game->state; }
+void game_fsm_send(game_t *game, fsm_trigger_id_t trigger) {
+    fsm_send(STATE_COUNT, TRIGGER_COUNT, game_state_transition_table, trigger,
+             get_game_state(game));
+}
 
 // -----------------------------------------------------------------------------
 // Auxiliary
@@ -137,7 +200,7 @@ static void handle_goal(game_t *game, player_t *player) {
 /**
  * Input processing block.
  */
-static void input_process(game_t *game) {
+static void gameplay_input_process(game_t *game) {
     uint8_t *is_game_running = &game->running;
     entity_t *lpad           = &game->left_paddle;
     entity_t *rpad           = &game->right_paddle;
@@ -176,7 +239,7 @@ static void input_process(game_t *game) {
 /**
  * Graphics processing block.
  */
-static void graphics_process(game_t *game) {
+static void gameplay_graphics_process(game_t *game) {
     char p1_score_str[3];
     char p2_score_str[3];
 
@@ -195,16 +258,102 @@ static void graphics_process(game_t *game) {
     return;
 }
 
-static void rules_process(game_t *game) {
+static void gameplay_rules_process(game_t *game) {
 
+    static uint8_t const winning_score = 5;
+
+    player_t *player_1 = get_player_1(game);
+    player_t *player_2 = get_player_2(game);
+
+    // Is the ball in the left goal?
     if (is_ball_in_left_goal(game)) {
         // player 2 gets the point
-        handle_goal(game, get_player_2(game));
+        handle_goal(game, player_2);
     }
 
-    if (is_ball_in_right_goal(game)) {
+    // Is the ball in the right goal?
+    else if (is_ball_in_right_goal(game)) {
         // player 1 gets the point
-        handle_goal(game, get_player_1(game));
+        handle_goal(game, player_1);
+    }
+
+    // Did player 1 win?
+    if (get_score(player_1) >= winning_score) {
+        game_fsm_send(game, GAME_OVER_TRIGGER);
+    }
+
+    // Did player 2 win?
+    else if (get_score(player_2) >= winning_score) {
+        game_fsm_send(game, GAME_OVER_TRIGGER);
+    }
+}
+
+// -------------------------------------
+// Per-State Processing Blocks
+// -------------------------------------
+
+/**
+ * Processing block when STATE == INITIALIZING
+ */
+static void process_game_state_initializing(game_t *game, float delta) {
+    (void)delta;
+    game_fsm_send(game, INIT_DONE_TRIGGER);
+}
+
+/**
+ * Processing block when STATE == PLAYING
+ */
+static void process_game_state_playing(game_t *game, float delta) {
+    gameplay_input_process(game);
+    gameplay_physics_process(game, delta);
+    gameplay_rules_process(game);
+    gameplay_graphics_process(game);
+}
+
+/**
+ * Processing block when STATE == GAME OVER
+ */
+static void process_game_state_game_over(game_t *game, float delta) {
+    (void)game;
+    (void)delta;
+    game_fsm_send(game, ALWAYS_TRIGGER);
+}
+
+/**
+ * Processing block when STATE == TERMINATING
+ */
+static void process_game_state_terminating(game_t *game, float delta) {
+    (void)delta;
+    game->running = 0;
+}
+
+// -------------------------------------
+// Game FSM-Driver
+// -------------------------------------
+
+/**
+ * Execute game processing blocks based on current game state.
+ */
+static void process_game_fsm(game_t *game, float delta) {
+
+    fsm_state_id_t *game_state = get_game_state(game);
+
+    switch (*game_state) {
+    case INIT_STATE: // Start State
+        process_game_state_initializing(game, delta);
+        break;
+    case PLAYING_STATE:
+        process_game_state_playing(game, delta);
+        break;
+    case GAME_OVER_STATE:
+        process_game_state_game_over(game, delta);
+        break;
+    case TERM_STATE: // Stop State
+        process_game_state_terminating(game, delta);
+        break;
+    // TODO:  Panic on unknown state!
+    default:
+        break;
     }
 }
 
@@ -244,10 +393,7 @@ void game_loop(game_t *game) {
         curr_frame_ticks = SDL_GetTicks64();
         delta            = (curr_frame_ticks - prev_frame_ticks) / 1000.0f;
 
-        input_process(game);
-        physics_process(game, delta);
-        rules_process(game);
-        graphics_process(game);
+        process_game_fsm(game, delta);
 
         // --- End Frame Timing
         //
@@ -314,6 +460,13 @@ game_t *game_init(game_config_t config) {
 
     // TODO: Generalize font selection
     game->sdl.font = TTF_OpenFont("res/font.ttf", 24);
+
+    // --- Initialize Static FSM
+
+    // TODO: Move to config?
+    // NOTE: Probably not the whole thing to config,
+    // ------- just support options that may tweak core fsm.
+    game->state = INIT_STATE;
 
     // --- Initialize Entity Properties
 

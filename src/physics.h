@@ -2,4 +2,4 @@
 
 #include "game.h"
 
-void physics_process(game_t *, float delta);
+void gameplay_physics_process(game_t *, float delta);
