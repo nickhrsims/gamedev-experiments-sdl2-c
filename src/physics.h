@@ -1,5 +1,9 @@
 #pragma once
 
-#include "game.h"
+#include "entities/entity.h"
 
-void gameplay_physics_process(game_t *, float delta);
+/**
+ * Move entities based on their current position, velocity, and time delta.
+ */
+void physics_move_entities(size_t entity_count,
+                           entity_t *entity_pool[entity_count], float delta);

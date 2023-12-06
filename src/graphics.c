@@ -1,66 +1,82 @@
 #include <SDL2/SDL.h>
 
-#include "game.h"
+#include "graphics.h"
+
+// -----------------------------------------------------------------------------
+// Static SDL2 Resources
+// -----------------------------------------------------------------------------
+//
+// NOTE: System does not support multiples of ANY SDL2 base resources.
+
+static SDL_Renderer *renderer = NULL;
+
+void graphics_init(SDL_Window *window) {
+    // No use for variable index or flags.
+    static unsigned char const RENDERER_INDEX = 0;
+    static unsigned char const RENDERER_FLAGS = 0;
+
+    renderer = SDL_CreateRenderer(window, RENDERER_INDEX, RENDERER_FLAGS);
+}
 
 /**
  * Clear the screen.
  */
-void graphics_clear(game_t *game) {
-    SDL_RenderClear(game->sdl.renderer);
+void graphics_clear(void) {
+    SDL_RenderClear(renderer);
     return;
 }
 
 /**
  * Display all drawn entities.
  */
-void graphics_show(game_t *game) {
-    SDL_RenderPresent(game->sdl.renderer);
+void graphics_show(void) {
+    SDL_RenderPresent(renderer);
     return;
 }
 
 /**
  * Set entity draw color.
  */
-void graphics_set_color(game_t *game, uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
-    SDL_SetRenderDrawColor(game->sdl.renderer, r, g, b, a);
+void graphics_set_color(uint8_t r, uint8_t g, uint8_t b, uint8_t a) {
+    SDL_SetRenderDrawColor(renderer, r, g, b, a);
     return;
 }
 
 /**
  * Reset entity draw color (set color to black).
  */
-void graphics_reset_color(game_t *game) {
-    graphics_set_color(game, 0, 0, 0, 0);
+void graphics_reset_color(void) {
+    graphics_set_color(0, 0, 0, 0);
     return;
 }
 
 /**
  * Draw specific entity.
  */
-static void draw_entity(game_t *game, entity_t *e) {
-    SDL_RenderFillRect(game->sdl.renderer,
-                       &(SDL_Rect){.x = e->x, .y = e->y, .w = e->w, .h = e->h});
+static void draw_entity(entity_t *e) {
+    aabb_t rect;
+    entity_get_aabb(e, &rect);
+    SDL_RenderFillRect(renderer, &rect);
     return;
 }
 
 /**
  * Draw all entities of given game instance.
  */
-void graphics_draw_entities(game_t *game) {
-    draw_entity(game, &game->ball);
-    draw_entity(game, &game->left_paddle);
-    draw_entity(game, &game->right_paddle);
+void graphics_draw_entities(size_t entity_count, entity_t *entity_pool[entity_count]) {
+    for (size_t entity_num = 0; entity_num < entity_count; entity_num++) {
+        draw_entity(entity_pool[entity_num]);
+    }
 }
 
 /**
  * Draw text.
  */
-void graphics_draw_text(game_t *game, char *str, int16_t x, int16_t y) {
+void graphics_draw_text(TTF_Font *font, char *str, int x, int y) {
     SDL_Surface *surface =
-        TTF_RenderText_Solid(game->sdl.font, str, (SDL_Color){255, 255, 255, 255});
+        TTF_RenderText_Solid(font, str, (SDL_Color){255, 255, 255, 255});
 
-    SDL_Texture *texture = SDL_CreateTextureFromSurface(game->sdl.renderer, surface);
+    SDL_Texture *texture = SDL_CreateTextureFromSurface(renderer, surface);
 
-    SDL_RenderCopy(game->sdl.renderer, texture, NULL,
-                   &(SDL_Rect){x, y, surface->w, surface->h});
+    SDL_RenderCopy(renderer, texture, NULL, &(SDL_Rect){x, y, surface->w, surface->h});
 }

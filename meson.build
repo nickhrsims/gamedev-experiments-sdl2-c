@@ -11,11 +11,21 @@ logc = dependency('log.c', version : 'cci.20200620')
 cloveunit = dependency('clove-unit', version : '2.4.1')
 
 exe = executable('pong',
-                 'src/main.c',
+                 'src/entities/ball.c',
+                 'src/entities/entity.c',
+                 'src/entities/paddle.c',
                  'src/fsm.c',
+                 'src/input/actions.c',
+                 'src/input/keyboard.c',
+                 'src/aabb.c',
+                 'src/app.c',
+                 'src/field.c',
                  'src/game.c',
                  'src/graphics.c',
+                 'src/main.c',
                  'src/physics.c',
+                 'src/player.c',
                  install : false,
+                 include_directories : ['src'],
                  dependencies : [sdl2, sdl2_ttf, logc, cloveunit, cmath],
                 )
