@@ -220,10 +220,50 @@ static void apply_collision_to_ball(void) {
         entity_set_direction(&ball, DIR_UP);
     }
 
-    if (aabb_is_intersecting(&ball_box, &lpad_box)) {
+    switch (physics_get_collision(&ball, &left_paddle)) {
+    case COLLIDING_ON_LEFT:
+        log_debug("LEFT");
         entity_set_direction(&ball, DIR_RIGHT);
-    } else if (aabb_is_intersecting(&ball_box, &rpad_box)) {
+        break;
+    case COLLIDING_ON_RIGHT:
+        log_debug("RIGHT");
         entity_set_direction(&ball, DIR_LEFT);
+        break;
+    case COLLIDING_ON_TOP:
+        log_debug("TOP");
+        entity_set_direction(&ball, DIR_DOWN);
+        break;
+    case COLLIDING_ON_BOTTOM:
+        log_debug("BOTTOM");
+        entity_set_direction(&ball, DIR_UP);
+        break;
+    case NOT_COLLIDING:
+        break;
+    default:
+        break;
+    }
+
+    switch (physics_get_collision(&ball, &right_paddle)) {
+    case COLLIDING_ON_LEFT:
+        log_debug("LEFT");
+        entity_set_direction(&ball, DIR_RIGHT);
+        break;
+    case COLLIDING_ON_RIGHT:
+        log_debug("RIGHT");
+        entity_set_direction(&ball, DIR_LEFT);
+        break;
+    case COLLIDING_ON_TOP:
+        log_debug("TOP");
+        entity_set_direction(&ball, DIR_DOWN);
+        break;
+    case COLLIDING_ON_BOTTOM:
+        log_debug("BOTTOM");
+        entity_set_direction(&ball, DIR_UP);
+        break;
+    case NOT_COLLIDING:
+        break;
+    default:
+        break;
     }
 }
 

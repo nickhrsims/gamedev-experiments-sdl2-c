@@ -13,14 +13,6 @@ typedef enum {
   AABB_BOTTOM_EDGE
 } edge_t;
 
-typedef enum {
-  AABB_COLLIDING_LR,
-  AABB_COLLIDING_RL,
-  AABB_COLLIDING_TB,
-  AABB_COLLIDING_BT,
-  AABB_NOT_COLLIDING
-} collision_t;
-
 /**
  * Return `true` if `inner` is beyond `outer` for given `edge`.
  *
