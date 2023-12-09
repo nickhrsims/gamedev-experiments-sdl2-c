@@ -22,7 +22,6 @@ static entity_t ball         = {0};
 static entity_t left_paddle  = {0};
 static entity_t right_paddle = {0};
 static aabb_t field          = {0};
-static bool is_game_running  = false;
 
 // -----------------------------------------------------------------------------
 // State Machine
