@@ -1,0 +1,10 @@
+#!/usr/bin/env bash 
+
+if [[ ! -d res ]]; then echo "No `res` directory, refusing package process"; exit 1; fi
+if [[ ! -a build/pong ]]; then echo "No `pong` binary found, refusing package process"; exit 1; fi
+if [[ ! -d dist ]]; then mkdir dist; fi
+cp -r res dist;
+cp build/pong dist;
+cd dist;
+tar cf pong.tar pong res;
+xz pong.tar;
