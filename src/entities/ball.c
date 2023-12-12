@@ -10,6 +10,11 @@
 // --- Velocity Scale (How fast does the ball move?)
 #define BALL_VELOCITY_SCALE 300
 
+static void update(entity_t *ball, float delta) {
+    ball->x += (int)(ball->vx * delta);
+    ball->y += (int)(ball->vy * delta);
+}
+
 /**
  * Configure a pre-allocated ball.
  */
@@ -28,6 +33,8 @@ void ball_configure(entity_t *ball, aabb_t *field) {
     int random_vx = floor(((double)rand() / (double)RAND_MAX) * BALL_VELOCITY_SCALE);
     int random_vy = floor(((double)rand() / (double)RAND_MAX) * BALL_VELOCITY_SCALE);
     entity_set_velocity(ball, random_vx, random_vy);
+
+    ball->update = update;
 }
 
 /**

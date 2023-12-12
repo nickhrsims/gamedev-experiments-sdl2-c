@@ -313,6 +313,15 @@ static void apply_collision_to_paddles(void) {
         entity_set_direction(&right_paddle, DIR_UP);
     }
 }
+
+static void update_entities(size_t entity_count, entity_t *entity_pool[entity_count],
+                            float delta) {
+    for (size_t entity_index = 0; entity_index < entity_count; entity_index++) {
+        entity_t *e = entity_pool[entity_index];
+        e->update(e, delta);
+    }
+}
+
 /**
  * Primary game operations and timing loop.
  *
@@ -321,8 +330,7 @@ static void apply_collision_to_paddles(void) {
 void do_update_process(float delta) {
     apply_collision_to_ball();
     apply_collision_to_paddles();
-    physics_move_entities(3, (entity_t *[3]){&ball, &left_paddle, &right_paddle},
-                          delta);
+    update_entities(3, (entity_t *[3]){&ball, &left_paddle, &right_paddle}, delta);
     check_goal_conditions();
 }
 

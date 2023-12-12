@@ -1,4 +1,5 @@
 #include "paddle.h"
+#include "entities/entity.h"
 #include "log.h"
 
 // --- Field Section Horizontal Ratio
@@ -8,6 +9,11 @@
 // --- Minimum Size
 #define PADDLE_MIN_WIDTH  8
 #define PADDLE_MIN_HEIGHT 128
+
+static void update(entity_t *paddle, float delta) {
+    paddle->x += (int)(paddle->vx * delta);
+    paddle->y += (int)(paddle->vy * delta);
+}
 
 /**
  * Configure `paddle` based on playing `field` of type `identifier`.
@@ -77,4 +83,7 @@ void paddle_configure(entity_t *paddle, aabb_t *field, paddle_identifier_t ident
 
     // --- Velocity
     entity_set_velocity(paddle, 0, 0);
+
+    // --- Update Callback
+    paddle->update = update;
 }

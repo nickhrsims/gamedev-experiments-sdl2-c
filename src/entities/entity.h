@@ -13,6 +13,8 @@ typedef struct entity_s {
   int h;
   int vx;
   int vy;
+  void (*update)(struct entity_s *, float);
+  void *data;
 } entity_t;
 
 entity_t *entity_init(void);
