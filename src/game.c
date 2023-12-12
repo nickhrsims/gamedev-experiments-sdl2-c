@@ -2,6 +2,7 @@
 
 #include <log.h>
 
+#include "SDL_scancode.h"
 #include "app.h"
 #include "entities/ball.h"
 #include "entities/entity.h"
@@ -75,6 +76,70 @@ static void trigger(unsigned int trigger_id) {
     fsm_send(STATE_COUNT, TRIGGER_COUNT, fsm, trigger_id, &game_state);
 }
 
+// -----------------------------------------------------------------------------
+// Game Actions * Input Processing
+// -----------------------------------------------------------------------------
+
+typedef enum {
+    NULL_ACTION,
+    MENU_UP,
+    MENU_DOWN,
+    MENU_LEFT,
+    MENU_RIGHT,
+    P1_UP,
+    P1_DOWN,
+    P2_UP,
+    P2_DOWN,
+    CONFIRM,
+    CANCEL,
+    QUIT,
+    ACTION_COUNT,
+} game_action_t;
+
+static SDL_Scancode game_action_map[ACTION_COUNT] = {
+    [MENU_UP] = SDL_SCANCODE_UP,     [MENU_DOWN] = SDL_SCANCODE_DOWN,
+    [MENU_LEFT] = SDL_SCANCODE_LEFT, [MENU_RIGHT] = SDL_SCANCODE_RIGHT,
+    [P1_UP] = SDL_SCANCODE_A,        [P1_DOWN] = SDL_SCANCODE_Z,
+    [P2_UP] = SDL_SCANCODE_K,        [P2_DOWN] = SDL_SCANCODE_M,
+    [CONFIRM] = SDL_SCANCODE_RETURN, [CANCEL] = SDL_SCANCODE_BACKSPACE,
+    [QUIT] = SDL_SCANCODE_ESCAPE,
+};
+
+static bool game_actions[ACTION_COUNT] = {0};
+
+static void collect_actions_from_keyboard(void) {
+    // Polling is done in app layer
+    uint8_t const *kb = SDL_GetKeyboardState(NULL);
+
+    for (size_t action_index = 0; action_index < ACTION_COUNT; action_index++) {
+        game_actions[action_index] = kb[game_action_map[action_index]];
+    }
+}
+
+static void process_actions(void) {
+    if (game_actions[QUIT]) {
+        trigger(QUIT_GAME_TRIGGER);
+    }
+
+    if (game_actions[P1_UP]) {
+        entity_set_velocity(&left_paddle, 0, -200);
+    } else if (game_actions[P1_DOWN]) {
+        entity_set_velocity(&left_paddle, 0, 200);
+    } else {
+        entity_set_velocity(&left_paddle, 0, 0);
+    }
+
+    if (game_actions[P2_UP]) {
+        entity_set_velocity(&right_paddle, 0, -200);
+    } else if (game_actions[P2_DOWN]) {
+        entity_set_velocity(&right_paddle, 0, 200);
+    } else {
+        entity_set_velocity(&right_paddle, 0, 0);
+    }
+
+    return;
+}
+
 /**
  * Respond to a player receiving a goal.
  *
@@ -89,53 +154,16 @@ static void handle_goal(player_t *player) {
 // -----------------------------------------------------------------------------
 
 /**
- * Input processing block.
- */
-static void do_inputs_process(void) {
-
-    SDL_Event event;
-    SDL_PollEvent(&event);
-
-    uint8_t const *kb = SDL_GetKeyboardState(NULL);
-
-    // Quit Game
-    if (event.type == SDL_QUIT || kb[SDL_SCANCODE_ESCAPE]) {
-        trigger(QUIT_GAME_TRIGGER);
-    }
-
-    // TODO: Move into keyboard/actions abstraction
-
-    // Left Paddle (A: UP, Z: DOWN)
-    if (kb[SDL_SCANCODE_A]) {
-        entity_set_velocity(&left_paddle, 0, -200);
-    } else if (kb[SDL_SCANCODE_Z]) {
-        entity_set_velocity(&left_paddle, 0, 200);
-    } else {
-        entity_set_velocity(&left_paddle, 0, 0);
-    }
-
-    // Right Paddle (K: UP, M: DOWN)
-    if (kb[SDL_SCANCODE_K]) {
-        entity_set_velocity(&right_paddle, 0, -200);
-    } else if (kb[SDL_SCANCODE_M]) {
-        entity_set_velocity(&right_paddle, 0, 200);
-    } else {
-        entity_set_velocity(&right_paddle, 0, 0);
-    }
-
-    return;
-}
-
-/**
  * Graphics processing block.
  */
 static void do_graphics_process(app_t *app) {
-    char p1_score_str[3];
-    char p2_score_str[3];
+    static uint8_t SCORE_STRING_LENGTH = 5; // 5 digits + sentinel
+    char p1_score_str[SCORE_STRING_LENGTH + 1];
+    char p2_score_str[SCORE_STRING_LENGTH + 1];
 
     // TODO: Abstract into itoa-like func for players
-    snprintf(p1_score_str, 3, "%d", player_get_score(&player_1));
-    snprintf(p2_score_str, 3, "%d", player_get_score(&player_2));
+    snprintf(p1_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_1));
+    snprintf(p2_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_2));
 
     graphics_clear();
     graphics_set_color(255, 255, 255, 255);
@@ -302,7 +330,8 @@ void do_update_process(float delta) {
  * Processing block when STATE == PLAYING
  */
 static void do_gameplay_loop(app_t *app, float delta) {
-    do_inputs_process();
+    collect_actions_from_keyboard();
+    process_actions();
     do_update_process(delta);
     do_graphics_process(app);
 }

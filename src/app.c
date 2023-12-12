@@ -50,6 +50,8 @@ void app_terminate(void) {
 }
 
 void app_run(frame_processor_t process_frame) {
+    /** Input Event Processing */
+    SDL_Event event;
 
     /** CPU ticks at the start of the last frame. */
     uint64_t prev_frame_ticks = SDL_GetTicks64();
@@ -78,7 +80,16 @@ void app_run(frame_processor_t process_frame) {
         curr_frame_ticks = SDL_GetTicks64();
         delta            = (curr_frame_ticks - prev_frame_ticks) / 1000.0f;
 
+        // --- Poll input events
+        SDL_PollEvent(&event);
+
+        // --- Process Frame
         is_app_running = process_frame(&app, delta);
+
+        // --- Check OS-level quit request
+        if (event.type == SDL_QUIT) {
+            is_app_running = false;
+        }
 
         // --- End Frame Timing
         //
