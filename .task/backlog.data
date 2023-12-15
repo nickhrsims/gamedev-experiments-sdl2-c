@@ -8,3 +8,9 @@
 {"description":"Refactor input actions around new entity motion.","end":"20231215T163732Z","entry":"20231213T184816Z","modified":"20231215T163734Z","status":"deleted","uuid":"73b28414-519c-402b-bc35-eda9a1e751cf","depends":["a59dce23-eff7-4ee2-b848-e0b77e774f42"]}
 {"description":"Refactor: Support entity data.","end":"20231215T163809Z","entry":"20231213T202931Z","modified":"20231215T163811Z","status":"deleted","uuid":"9bd44c93-f2c7-460e-be94-10c1fb9ec56d"}
 {"description":"Simplify paddle velocity control block.","end":"20231215T173851Z","entry":"20231213T184748Z","modified":"20231215T173851Z","status":"completed","uuid":"a59dce23-eff7-4ee2-b848-e0b77e774f42"}
+{"description":"Feature: support pausing","entry":"20231215T174102Z","modified":"20231215T174102Z","status":"pending","uuid":"21c7d59a-4763-4060-b6bb-245918fdf8bc"}
+{"description":"Refactor: expand FSM to prepare for future feature flexibility","entry":"20231215T174142Z","modified":"20231215T174142Z","status":"pending","uuid":"13918069-d50b-41bf-9efa-28d609155368"}
+{"description":"Refactor: Support multiple keybinds to actions","entry":"20231215T174421Z","modified":"20231215T174421Z","status":"pending","uuid":"643dd693-e0f6-43f3-a9c8-d6847285dce1"}
+{"description":"Code Support: Function-based API for configuring input map.","entry":"20231215T174812Z","modified":"20231215T174812Z","status":"pending","uuid":"bb6b83bd-0877-4b81-b4ab-f3b8971cac09"}
+{"description":"Refactor: Support multiple keybinds to actions","entry":"20231215T174421Z","modified":"20231215T174837Z","status":"pending","uuid":"643dd693-e0f6-43f3-a9c8-d6847285dce1","depends":["bb6b83bd-0877-4b81-b4ab-f3b8971cac09"]}
+{"description":"Feature: support pausing","entry":"20231215T174102Z","modified":"20231215T174855Z","status":"pending","uuid":"21c7d59a-4763-4060-b6bb-245918fdf8bc","depends":["13918069-d50b-41bf-9efa-28d609155368"]}
