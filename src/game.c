@@ -121,21 +121,13 @@ static void process_actions(void) {
         trigger(QUIT_GAME_TRIGGER);
     }
 
-    if (game_actions[P1_UP]) {
-        entity_set_velocity(&left_paddle, 0, -200);
-    } else if (game_actions[P1_DOWN]) {
-        entity_set_velocity(&left_paddle, 0, 200);
-    } else {
-        entity_set_velocity(&left_paddle, 0, 0);
-    }
+    bool p1_up   = game_actions[P1_UP];
+    bool p1_down = game_actions[P1_DOWN];
+    bool p2_up   = game_actions[P2_UP];
+    bool p2_down = game_actions[P2_DOWN];
 
-    if (game_actions[P2_UP]) {
-        entity_set_velocity(&right_paddle, 0, -200);
-    } else if (game_actions[P2_DOWN]) {
-        entity_set_velocity(&right_paddle, 0, 200);
-    } else {
-        entity_set_velocity(&right_paddle, 0, 0);
-    }
+    entity_set_velocity(&left_paddle, 0, (p1_down - p1_up) * 200);
+    entity_set_velocity(&right_paddle, 0, (p2_down - p2_up) * 200);
 
     return;
 }
