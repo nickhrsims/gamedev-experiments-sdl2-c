@@ -18,3 +18,15 @@ new [dep_a59dce23-eff7-4ee2-b848-e0b77e774f42:"x" depends:"a59dce23-eff7-4ee2-b8
 time 1702499371
 new [description:"Refactor: Support entity data." entry:"1702499371" modified:"1702499371" status:"pending" uuid:"9bd44c93-f2c7-460e-be94-10c1fb9ec56d"]
 ---
+time 1702658231
+old [description:"Factor out velocity properties from entities." entry:"1702493268" modified:"1702493268" status:"pending" uuid:"a59dce23-eff7-4ee2-b848-e0b77e774f42"]
+new [description:"Simplify paddle velocity control block." entry:"1702493268" modified:"1702658231" status:"pending" uuid:"a59dce23-eff7-4ee2-b848-e0b77e774f42"]
+---
+time 1702658254
+old [dep_a59dce23-eff7-4ee2-b848-e0b77e774f42:"x" depends:"a59dce23-eff7-4ee2-b848-e0b77e774f42" description:"Refactor input actions around new entity motion." entry:"1702493296" modified:"1702493364" status:"pending" uuid:"73b28414-519c-402b-bc35-eda9a1e751cf"]
+new [dep_a59dce23-eff7-4ee2-b848-e0b77e774f42:"x" depends:"a59dce23-eff7-4ee2-b848-e0b77e774f42" description:"Refactor input actions around new entity motion." end:"1702658252" entry:"1702493296" modified:"1702658254" status:"deleted" uuid:"73b28414-519c-402b-bc35-eda9a1e751cf"]
+---
+time 1702658291
+old [description:"Refactor: Support entity data." entry:"1702499371" modified:"1702499371" status:"pending" uuid:"9bd44c93-f2c7-460e-be94-10c1fb9ec56d"]
+new [description:"Refactor: Support entity data." end:"1702658289" entry:"1702499371" modified:"1702658291" status:"deleted" uuid:"9bd44c93-f2c7-460e-be94-10c1fb9ec56d"]
+---
