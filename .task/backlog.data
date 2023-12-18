@@ -19,3 +19,5 @@
 {"description":"Support: unit tests","entry":"20231215T180027Z","modified":"20231215T180027Z","status":"pending","uuid":"ebff1f15-dee6-4d5a-914f-1b9aecfcb2d9"}
 {"description":"Create decision record for struct-of-arrays vs stuct-of-struct fsm design","entry":"20231215T213557Z","modified":"20231215T213557Z","status":"pending","uuid":"56a56b1f-be2d-4998-bc96-00a16e408b3d"}
 {"description":"Create two decision records. One for library design of allowing static AND dynamic, another for naming convention of those styles (config vs alloc vs init)","entry":"20231218T152847Z","modified":"20231218T152847Z","status":"pending","uuid":"1ead29fa-ca0f-431d-b0a0-108301f80a4c"}
+{"description":"Refactor: Write function-based API for configuring dynamic struct-based fsm.","end":"20231218T153017Z","entry":"20231215T175913Z","modified":"20231218T153017Z","status":"completed","uuid":"7d9b7761-4881-4c62-b98c-d0a72b9023ed"}
+{"description":"Support: unit tests","end":"20231218T153030Z","entry":"20231215T180027Z","modified":"20231218T153030Z","status":"completed","uuid":"ebff1f15-dee6-4d5a-914f-1b9aecfcb2d9"}

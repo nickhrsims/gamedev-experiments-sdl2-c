@@ -24,6 +24,7 @@ typedef struct {
 
 typedef bool (*frame_processor_t)(app_t *, float);
 
-void app_initialize(app_config_t *config);
-void app_terminate(void);
-void app_run(frame_processor_t processor);
+// TODO: Redesign relationship to app allocation
+void app_init(app_t *app, app_config_t *config);
+void app_term(app_t *app);
+void app_run(app_t *app, frame_processor_t processor);

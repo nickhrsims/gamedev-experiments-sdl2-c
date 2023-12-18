@@ -10,14 +10,13 @@ static bool is_app_running     = false;
 
 // --- Window
 #define DEFAULT_WINDOW_FLAGS 0
-static app_t app;
 
 /**
  * Initialize static application.
  *
  * TODO: Return error code.
  */
-void app_initialize(app_config_t *config) {
+void app_init(app_t *app, app_config_t *config) {
 
     log_set_level(LOG_DEBUG);
 
@@ -25,7 +24,7 @@ void app_initialize(app_config_t *config) {
     SDL_Init(SDL_INIT_VIDEO);
 
     // --- Window
-    app.window = SDL_CreateWindow(
+    app->window = SDL_CreateWindow(
         config->window_title, config->window_position_x, config->window_position_y,
         config->window_width, config->window_height,
         config->window_is_fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
@@ -33,7 +32,7 @@ void app_initialize(app_config_t *config) {
     // --- Font
     // TODO: Generalize font selection
     TTF_Init();
-    app.font = TTF_OpenFont("res/font.ttf", 24);
+    app->font = TTF_OpenFont("res/font.ttf", 24);
 
     // --- Flags
     is_app_initialized = true;
@@ -43,13 +42,13 @@ void app_initialize(app_config_t *config) {
 /**
  * Terminate static applicaiton.
  */
-void app_terminate(void) {
-    TTF_CloseFont(app.font);
-    SDL_DestroyWindow(app.window);
+void app_term(app_t *app) {
+    TTF_CloseFont(app->font);
+    SDL_DestroyWindow(app->window);
     SDL_Quit();
 }
 
-void app_run(frame_processor_t process_frame) {
+void app_run(app_t *app, frame_processor_t process_frame) {
     /** Input Event Processing */
     SDL_Event event;
 
@@ -84,7 +83,7 @@ void app_run(frame_processor_t process_frame) {
         SDL_PollEvent(&event);
 
         // --- Process Frame
-        is_app_running = process_frame(&app, delta);
+        is_app_running = process_frame(app, delta);
 
         // --- Check OS-level quit request
         if (event.type == SDL_QUIT) {

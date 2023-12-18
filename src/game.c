@@ -8,7 +8,7 @@
 #include "entities/entity.h"
 #include "entities/paddle.h"
 #include "field.h"
-#include "fsm.h"
+#include "fsm/fsm.h"
 #include "game.h"
 #include "graphics.h"
 #include "physics.h"
@@ -28,9 +28,13 @@ static aabb_t field          = {0};
 // State Machine
 // -----------------------------------------------------------------------------
 
+// State Machine Handle
+fsm_t *fsm;
+
 // State Options
 enum game_state_enum {
-    INIT_STATE = 1,
+    STATE_GUARD,
+    START_STATE,
     PLAYING_STATE,
     GAME_OVER_STATE,
     TERM_STATE,
@@ -39,42 +43,12 @@ enum game_state_enum {
 
 // Trigger Options
 enum game_trigger_enum {
-    INIT_DONE_TRIGGER = 1,
+    INIT_DONE_TRIGGER,
     QUIT_GAME_TRIGGER,
     GAME_OVER_TRIGGER,
     ALWAYS_TRIGGER,
     TRIGGER_COUNT,
 };
-
-// Current State
-static unsigned int game_state = INIT_STATE;
-
-// Transition Table
-static unsigned int fsm[STATE_COUNT][TRIGGER_COUNT] = {
-    [INIT_STATE] =
-        {
-            [INIT_DONE_TRIGGER] = PLAYING_STATE,
-        },
-    [PLAYING_STATE] =
-        {
-            [GAME_OVER_TRIGGER] = GAME_OVER_STATE,
-            [QUIT_GAME_TRIGGER] = TERM_STATE,
-        },
-    [GAME_OVER_STATE] =
-        {
-            [ALWAYS_TRIGGER] = TERM_STATE,
-        },
-    [TERM_STATE] =
-        {
-            [ALWAYS_TRIGGER] = TERM_STATE,
-
-        },
-};
-
-// Transition Wrapper Function
-static void trigger(unsigned int trigger_id) {
-    fsm_send(STATE_COUNT, TRIGGER_COUNT, fsm, trigger_id, &game_state);
-}
 
 // -----------------------------------------------------------------------------
 // Game Actions * Input Processing
@@ -118,7 +92,7 @@ static void collect_actions_from_keyboard(void) {
 
 static void process_actions(void) {
     if (game_actions[QUIT]) {
-        trigger(QUIT_GAME_TRIGGER);
+        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
     }
 
     bool p1_up   = game_actions[P1_UP];
@@ -188,40 +162,18 @@ static void check_goal_conditions(void) {
 
     // Did player 1 win?
     if (player_get_score(&player_1) >= winning_score) {
-        trigger(GAME_OVER_TRIGGER);
+        fsm_trigger(fsm, GAME_OVER_TRIGGER);
     }
 
     // Did player 2 win?
     else if (player_get_score(&player_2) >= winning_score) {
-        trigger(GAME_OVER_TRIGGER);
+        fsm_trigger(fsm, GAME_OVER_TRIGGER);
     }
 }
 
 // -------------------------------------
 // Per-State Processing Blocks
 // -------------------------------------
-
-/**
- * Processing block when STATE == INITIALIZING
- */
-static void do_initialize_game(app_t *app) {
-    // --- Graphics System
-    graphics_init(app->window);
-
-    // --- Field Configuration
-    int window_width, window_height;
-    SDL_GetWindowSize(app->window, &window_width, &window_height);
-    field.w = window_width;
-    field.h = window_height;
-
-    // --- Entity Configuration
-    ball_configure(&ball, &field);
-    paddle_configure(&left_paddle, &field, LEFT_PADDLE);
-    paddle_configure(&right_paddle, &field, RIGHT_PADDLE);
-
-    trigger(INIT_DONE_TRIGGER);
-    log_debug("Initialization Complete");
-}
 
 static void apply_collision_to_ball(void) {
 
@@ -340,25 +292,70 @@ static void do_gameplay_loop(app_t *app, float delta) {
 // Game FSM-Driver
 // -------------------------------------
 
+static void initialize_game_fsm(void) {
+    fsm = fsm_init(STATE_COUNT, TRIGGER_COUNT, START_STATE);
+
+    // Start
+    fsm_on(fsm, START_STATE, ALWAYS_TRIGGER, PLAYING_STATE);
+
+    // Playing
+    fsm_on(fsm, PLAYING_STATE, GAME_OVER_TRIGGER, GAME_OVER_STATE);
+    fsm_on(fsm, PLAYING_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
+
+    // Game Over
+    fsm_on(fsm, GAME_OVER_STATE, ALWAYS_TRIGGER, TERM_STATE);
+
+    // Terminating
+    fsm_on(fsm, TERM_STATE, ALWAYS_TRIGGER, TERM_STATE);
+}
+
+static void terminate_game_fsm(fsm_t *fsm) { fsm_term(fsm); }
+
+void game_init(app_t *app) {
+
+    log_debug("Initializing Game");
+
+    // --- Graphics System
+    graphics_init(app->window);
+
+    // --- Field Configuration
+    int window_width, window_height;
+    SDL_GetWindowSize(app->window, &window_width, &window_height);
+    field.w = window_width;
+    field.h = window_height;
+
+    // --- Entity Configuration
+    ball_configure(&ball, &field);
+    paddle_configure(&left_paddle, &field, LEFT_PADDLE);
+    paddle_configure(&right_paddle, &field, RIGHT_PADDLE);
+
+    initialize_game_fsm();
+
+    log_debug("Initialization Complete");
+}
+
+// NOTE: UNUSED
+void game_term(void) { terminate_game_fsm(fsm); }
+
 /**
  * Execute game processing blocks based on current game state.
  */
 bool game_process_frame(app_t *app, float delta) {
-    switch (game_state) {
-    case INIT_STATE: // Start State
-        do_initialize_game(app);
+    switch (fsm_state(fsm)) {
+    case START_STATE: // Start State
+        fsm_trigger(fsm, ALWAYS_TRIGGER);
         break;
     case PLAYING_STATE:
         do_gameplay_loop(app, delta);
         break;
     case GAME_OVER_STATE:
-        trigger(ALWAYS_TRIGGER);
+        fsm_trigger(fsm, ALWAYS_TRIGGER);
         break;
     case TERM_STATE: // Stop State
         return false;
     // TODO:  Panic on unknown state!
     default:
-        log_error("Reached unknown state (%d)", game_state);
+        log_error("Reached unknown state (%d)", fsm_state(fsm));
         break;
     }
     return true;
