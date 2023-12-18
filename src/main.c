@@ -2,7 +2,7 @@
 #include <SDL2/SDL_ttf.h>
 
 #include "app.h"
-#include "game.h"
+#include "game/game.h"
 
 static app_t app;
 
