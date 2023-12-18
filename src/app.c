@@ -5,6 +5,7 @@
 #include "log.h"
 
 // --- Initialization Flag
+// TODO: Crash on second initialization attempt
 static bool is_app_initialized = false;
 static bool is_app_running     = false;
 
