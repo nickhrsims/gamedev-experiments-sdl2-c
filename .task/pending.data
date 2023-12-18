@@ -4,3 +4,4 @@
 [description:"Code Support: Function-based API for configuring input map." entry:"1702662492" modified:"1702662492" status:"pending" uuid:"bb6b83bd-0877-4b81-b4ab-f3b8971cac09"]
 [description:"Create decision record for struct-of-arrays vs stuct-of-struct fsm design" entry:"1702676157" modified:"1702676157" status:"pending" uuid:"56a56b1f-be2d-4998-bc96-00a16e408b3d"]
 [description:"Create two decision records. One for library design of allowing static AND dynamic, another for naming convention of those styles (config vs alloc vs init)" entry:"1702913327" modified:"1702913327" status:"pending" uuid:"1ead29fa-ca0f-431d-b0a0-108301f80a4c"]
+[description:"Make AABB\/Rect a first-party datatype for 'app' layer" entry:"1702919946" modified:"1702919946" status:"pending" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]

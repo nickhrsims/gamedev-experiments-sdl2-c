@@ -78,3 +78,6 @@ time 1702913430
 old [description:"Support: unit tests" entry:"1702663227" modified:"1702663227" status:"pending" uuid:"ebff1f15-dee6-4d5a-914f-1b9aecfcb2d9"]
 new [description:"Support: unit tests" end:"1702913430" entry:"1702663227" modified:"1702913430" status:"completed" uuid:"ebff1f15-dee6-4d5a-914f-1b9aecfcb2d9"]
 ---
+time 1702919946
+new [description:"Make AABB\/Rect a first-party datatype for 'app' layer" entry:"1702919946" modified:"1702919946" status:"pending" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
+---
