@@ -1,13 +1,14 @@
 #include <stdlib.h>
 
 #include "aabb.h"
+#include "alloc.h"
 #include "entity.h"
 
 /**
  * Create a new entity.
  */
 entity_t *entity_init(void) {
-    entity_t *e = malloc(sizeof(entity_t));
+    entity_t *e = new (entity_t);
     return e;
 }
 
