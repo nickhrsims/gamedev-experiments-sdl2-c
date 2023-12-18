@@ -93,3 +93,14 @@ new [description:"Refactor game to remove static data members" entry:"1702923266
 time 1702923280
 new [description:"Refactor app to provide video wrapper API" entry:"1702923280" modified:"1702923280" status:"pending" uuid:"1bb90f24-0f7c-43f4-9ce2-2699a15ce290"]
 ---
+time 1702924128
+new [description:"Split apart FSM states utilizing new generalized entity pool" entry:"1702924128" modified:"1702924128" status:"pending" uuid:"3b6aeb40-c38a-4f25-8644-450b254e156d"]
+---
+time 1702924163
+old [description:"Split apart FSM states utilizing new generalized entity pool" entry:"1702924128" modified:"1702924128" status:"pending" uuid:"3b6aeb40-c38a-4f25-8644-450b254e156d"]
+new [dep_13918069-d50b-41bf-9efa-28d609155368:"x" dep_ae74ae4d-9850-4934-910d-07afca9bda5a:"x" depends:"13918069-d50b-41bf-9efa-28d609155368,ae74ae4d-9850-4934-910d-07afca9bda5a" description:"Split apart FSM states utilizing new generalized entity pool" entry:"1702924128" modified:"1702924163" status:"pending" uuid:"3b6aeb40-c38a-4f25-8644-450b254e156d"]
+---
+time 1702924194
+old [dep_7d9b7761-4881-4c62-b98c-d0a72b9023ed:"x" depends:"7d9b7761-4881-4c62-b98c-d0a72b9023ed" description:"Refactor: expand FSM to prepare for future feature flexibility" entry:"1702662102" modified:"1702663169" status:"pending" uuid:"13918069-d50b-41bf-9efa-28d609155368"]
+new [dep_7d9b7761-4881-4c62-b98c-d0a72b9023ed:"x" dep_ae74ae4d-9850-4934-910d-07afca9bda5a:"x" depends:"7d9b7761-4881-4c62-b98c-d0a72b9023ed,ae74ae4d-9850-4934-910d-07afca9bda5a" description:"Refactor: expand FSM to prepare for future feature flexibility" entry:"1702662102" modified:"1702924194" status:"pending" uuid:"13918069-d50b-41bf-9efa-28d609155368"]
+---

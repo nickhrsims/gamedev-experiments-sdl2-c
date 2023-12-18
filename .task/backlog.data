@@ -26,3 +26,6 @@
 {"description":"Custom allocator to support static pool","entry":"20231218T181336Z","modified":"20231218T181336Z","status":"pending","uuid":"8f8d41be-7950-4117-b633-80fae5c15cb7"}
 {"description":"Refactor game to remove static data members","entry":"20231218T181426Z","modified":"20231218T181426Z","status":"pending","uuid":"ae74ae4d-9850-4934-910d-07afca9bda5a"}
 {"description":"Refactor app to provide video wrapper API","entry":"20231218T181440Z","modified":"20231218T181440Z","status":"pending","uuid":"1bb90f24-0f7c-43f4-9ce2-2699a15ce290"}
+{"description":"Split apart FSM states utilizing new generalized entity pool","entry":"20231218T182848Z","modified":"20231218T182848Z","status":"pending","uuid":"3b6aeb40-c38a-4f25-8644-450b254e156d"}
+{"description":"Split apart FSM states utilizing new generalized entity pool","entry":"20231218T182848Z","modified":"20231218T182923Z","status":"pending","uuid":"3b6aeb40-c38a-4f25-8644-450b254e156d","depends":["13918069-d50b-41bf-9efa-28d609155368","ae74ae4d-9850-4934-910d-07afca9bda5a"]}
+{"description":"Refactor: expand FSM to prepare for future feature flexibility","entry":"20231215T174142Z","modified":"20231218T182954Z","status":"pending","uuid":"13918069-d50b-41bf-9efa-28d609155368","depends":["7d9b7761-4881-4c62-b98c-d0a72b9023ed","ae74ae4d-9850-4934-910d-07afca9bda5a"]}
