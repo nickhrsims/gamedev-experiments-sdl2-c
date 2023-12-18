@@ -24,3 +24,5 @@
 {"description":"Make AABB\/Rect a first-party datatype for 'app' layer","entry":"20231218T171906Z","modified":"20231218T171906Z","status":"pending","uuid":"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"}
 {"description":"Fix new-ball trajectory (randomness, magnitude of speed, angle clamping, etc)","entry":"20231218T181215Z","modified":"20231218T181215Z","status":"pending","uuid":"76607c64-f2d0-45d8-9e66-fd8635e882a3"}
 {"description":"Custom allocator to support static pool","entry":"20231218T181336Z","modified":"20231218T181336Z","status":"pending","uuid":"8f8d41be-7950-4117-b633-80fae5c15cb7"}
+{"description":"Refactor game to remove static data members","entry":"20231218T181426Z","modified":"20231218T181426Z","status":"pending","uuid":"ae74ae4d-9850-4934-910d-07afca9bda5a"}
+{"description":"Refactor app to provide video wrapper API","entry":"20231218T181440Z","modified":"20231218T181440Z","status":"pending","uuid":"1bb90f24-0f7c-43f4-9ce2-2699a15ce290"}

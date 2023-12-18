@@ -87,3 +87,9 @@ new [description:"Fix new-ball trajectory (randomness, magnitude of speed, angle
 time 1702923216
 new [description:"Custom allocator to support static pool" entry:"1702923216" modified:"1702923216" status:"pending" uuid:"8f8d41be-7950-4117-b633-80fae5c15cb7"]
 ---
+time 1702923266
+new [description:"Refactor game to remove static data members" entry:"1702923266" modified:"1702923266" status:"pending" uuid:"ae74ae4d-9850-4934-910d-07afca9bda5a"]
+---
+time 1702923280
+new [description:"Refactor app to provide video wrapper API" entry:"1702923280" modified:"1702923280" status:"pending" uuid:"1bb90f24-0f7c-43f4-9ce2-2699a15ce290"]
+---
