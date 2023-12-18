@@ -84,3 +84,6 @@ new [description:"Make AABB\/Rect a first-party datatype for 'app' layer" entry:
 time 1702923135
 new [description:"Fix new-ball trajectory (randomness, magnitude of speed, angle clamping, etc)" entry:"1702923135" modified:"1702923135" status:"pending" uuid:"76607c64-f2d0-45d8-9e66-fd8635e882a3"]
 ---
+time 1702923216
+new [description:"Custom allocator to support static pool" entry:"1702923216" modified:"1702923216" status:"pending" uuid:"8f8d41be-7950-4117-b633-80fae5c15cb7"]
+---

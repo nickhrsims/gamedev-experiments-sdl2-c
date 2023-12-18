@@ -23,3 +23,4 @@
 {"description":"Support: unit tests","end":"20231218T153030Z","entry":"20231215T180027Z","modified":"20231218T153030Z","status":"completed","uuid":"ebff1f15-dee6-4d5a-914f-1b9aecfcb2d9"}
 {"description":"Make AABB\/Rect a first-party datatype for 'app' layer","entry":"20231218T171906Z","modified":"20231218T171906Z","status":"pending","uuid":"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"}
 {"description":"Fix new-ball trajectory (randomness, magnitude of speed, angle clamping, etc)","entry":"20231218T181215Z","modified":"20231218T181215Z","status":"pending","uuid":"76607c64-f2d0-45d8-9e66-fd8635e882a3"}
+{"description":"Custom allocator to support static pool","entry":"20231218T181336Z","modified":"20231218T181336Z","status":"pending","uuid":"8f8d41be-7950-4117-b633-80fae5c15cb7"}

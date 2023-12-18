@@ -6,3 +6,4 @@
 [description:"Create two decision records. One for library design of allowing static AND dynamic, another for naming convention of those styles (config vs alloc vs init)" entry:"1702913327" modified:"1702913327" status:"pending" uuid:"1ead29fa-ca0f-431d-b0a0-108301f80a4c"]
 [description:"Make AABB\/Rect a first-party datatype for 'app' layer" entry:"1702919946" modified:"1702919946" status:"pending" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
 [description:"Fix new-ball trajectory (randomness, magnitude of speed, angle clamping, etc)" entry:"1702923135" modified:"1702923135" status:"pending" uuid:"76607c64-f2d0-45d8-9e66-fd8635e882a3"]
+[description:"Custom allocator to support static pool" entry:"1702923216" modified:"1702923216" status:"pending" uuid:"8f8d41be-7950-4117-b633-80fae5c15cb7"]
