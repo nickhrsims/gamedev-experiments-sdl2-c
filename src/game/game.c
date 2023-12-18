@@ -3,16 +3,29 @@
 #include <log.h>
 
 #include "SDL_scancode.h"
-#include "app.h"
+
+#include "alloc.h"
+#include "app/app.h"
+#include "app/video.h"
 #include "entities/ball.h"
 #include "entities/entity.h"
 #include "entities/paddle.h"
 #include "field.h"
 #include "fsm/fsm.h"
 #include "game.h"
-#include "graphics.h"
 #include "physics.h"
 #include "player.h"
+
+// -----------------------------------------------------------------------------
+// Core Data Types
+// -----------------------------------------------------------------------------
+
+/**
+ * Game. Sub type of App.
+ */
+typedef struct game_s {
+    app_t *app;
+} game_t;
 
 // -----------------------------------------------------------------------------
 // Game Components
@@ -120,6 +133,18 @@ static void handle_goal(player_t *player) {
 // -----------------------------------------------------------------------------
 
 /**
+ * Draw all entities of given game instance.
+ * TODO: Fix via. first-party AABB in app layer.
+ */
+static void draw_entities(video_t *video, size_t entity_count,
+                          entity_t *entity_pool[entity_count]) {
+    for (size_t entity_num = 0; entity_num < entity_count; entity_num++) {
+        entity_t *e = entity_pool[entity_num];
+        video_draw_region(video, e->x, e->y, e->w, e->h);
+    }
+}
+
+/**
  * Graphics processing block.
  */
 static void do_graphics_process(app_t *app) {
@@ -131,13 +156,13 @@ static void do_graphics_process(app_t *app) {
     snprintf(p1_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_1));
     snprintf(p2_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_2));
 
-    graphics_clear();
-    graphics_set_color(255, 255, 255, 255);
-    graphics_draw_entities(3, (entity_t *[3]){&ball, &left_paddle, &right_paddle});
-    graphics_draw_text(app->font, p1_score_str, (field.x + field.w) / 2 - 48, 16);
-    graphics_draw_text(app->font, p2_score_str, (field.x + field.w) / 2 + 48, 16);
-    graphics_reset_color();
-    graphics_show();
+    video_clear(app->video);
+    video_set_color(app->video, 255, 255, 255, 255);
+    draw_entities(app->video, 3, (entity_t *[3]){&ball, &left_paddle, &right_paddle});
+    video_draw_text(app->video, p1_score_str, (field.x + field.w) / 2 - 48, 16);
+    video_draw_text(app->video, p2_score_str, (field.x + field.w) / 2 + 48, 16);
+    video_reset_color(app->video);
+    video_render(app->video);
 
     return;
 }
@@ -311,16 +336,16 @@ static void initialize_game_fsm(void) {
 
 static void terminate_game_fsm(fsm_t *fsm) { fsm_term(fsm); }
 
-void game_init(app_t *app) {
-
+game_t *game_init(app_config_t *config) {
     log_debug("Initializing Game");
 
-    // --- Graphics System
-    graphics_init(app->window);
+    // --- Application Initializer
+    game_t *game = new (game_t);
+    game->app    = app_init(config);
 
     // --- Field Configuration
     int window_width, window_height;
-    SDL_GetWindowSize(app->window, &window_width, &window_height);
+    video_get_window_size(game->app->video, &window_width, &window_height);
     field.w = window_width;
     field.h = window_height;
 
@@ -332,10 +357,14 @@ void game_init(app_t *app) {
     initialize_game_fsm();
 
     log_debug("Initialization Complete");
+    return game;
 }
 
 // NOTE: UNUSED
-void game_term(void) { terminate_game_fsm(fsm); }
+void game_term(game_t *game) {
+    terminate_game_fsm(fsm);
+    app_term(game->app);
+}
 
 /**
  * Execute game processing blocks based on current game state.
@@ -360,3 +389,5 @@ bool game_process_frame(app_t *app, float delta) {
     }
     return true;
 }
+
+void game_run(game_t *game) { app_run(game->app, game_process_frame); }

@@ -1,6 +1,9 @@
 #pragma once
 
-#include "app.h"
+#include "app/app.h"
 
-void game_init(app_t *app);
-bool game_process_frame(app_t *app, float delta);
+typedef struct game_s game_t;
+
+game_t *game_init(app_config_t *config);
+void game_term(game_t *game);
+void game_run(game_t *game);

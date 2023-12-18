@@ -1,13 +1,11 @@
 #include <stdbool.h>
 
 #include "SDL.h"
-#include "app.h"
-#include "log.h"
 
-// --- Initialization Flag
-// TODO: Crash on second initialization attempt
-static bool is_app_initialized = false;
-static bool is_app_running     = false;
+#include "alloc.h"
+#include "app/app.h"
+#include "app/video.h"
+#include "log.h"
 
 // --- Window
 #define DEFAULT_WINDOW_FLAGS 0
@@ -17,35 +15,28 @@ static bool is_app_running     = false;
  *
  * TODO: Return error code.
  */
-void app_init(app_t *app, app_config_t *config) {
+app_t *app_init(app_config_t *config) {
+
+    app_t *app = new (app_t);
 
     log_set_level(LOG_DEBUG);
 
-    // --- SDL2 System Initialization
-    SDL_Init(SDL_INIT_VIDEO);
+    app->video = video_init(
+        &(video_cfg_t){.window_title         = config->window_title,
+                       .window_position_x    = config->window_position_x,
+                       .window_position_y    = config->window_position_y,
+                       .window_width         = config->window_width,
+                       .window_height        = config->window_height,
+                       .window_is_fullscreen = config->window_is_fullscreen});
 
-    // --- Window
-    app->window = SDL_CreateWindow(
-        config->window_title, config->window_position_x, config->window_position_y,
-        config->window_width, config->window_height,
-        config->window_is_fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
-
-    // --- Font
-    // TODO: Generalize font selection
-    TTF_Init();
-    app->font = TTF_OpenFont("res/font.ttf", 24);
-
-    // --- Flags
-    is_app_initialized = true;
-    is_app_running     = true;
+    return app;
 }
 
 /**
  * Terminate static applicaiton.
  */
 void app_term(app_t *app) {
-    TTF_CloseFont(app->font);
-    SDL_DestroyWindow(app->window);
+    video_term(app->video);
     SDL_Quit();
 }
 
@@ -70,6 +61,9 @@ void app_run(app_t *app, frame_processor_t process_frame) {
 
     /** Time between frames. Measured in seconds. */
     float delta = 0;
+
+    /** Execution flag. */
+    static bool is_app_running = true;
 
     // --- Application Loop
     while (is_app_running) {

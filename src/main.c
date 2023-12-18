@@ -1,10 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 
-#include "app.h"
+#include "app/app.h"
 #include "game/game.h"
-
-static app_t app;
 
 int main(void) {
     app_config_t config = {.window_is_fullscreen = 0,
@@ -14,8 +12,7 @@ int main(void) {
                            .window_position_y    = 128,
                            .window_title         = "Pong"};
 
-    app_init(&app, &config);
-    game_init(&app);
-    app_run(&app, game_process_frame);
-    app_term(&app);
+    game_t *game = game_init(&config);
+    game_run(game);
+    game_term(game);
 }
