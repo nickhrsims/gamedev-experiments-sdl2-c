@@ -146,3 +146,27 @@ time 1702951040
 old [description:"Refactor all elements referenced directly by `game` to support generalized function pointers for dispatch" entry:"1702950863" modified:"1702950986" priority:"H" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
 new [description:"Refactor entities to support dispatch points required to allow pooling" entry:"1702950863" modified:"1702951040" priority:"H" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
 ---
+time 1702951571
+new [description:"Add `on collision` event handler to entities" entry:"1702951571" modified:"1702951571" status:"pending" uuid:"d7bf2c7b-8678-414e-8487-9214badb5711"]
+---
+time 1702951578
+new [description:"Add `on out of bounds` event handler to entities" entry:"1702951578" modified:"1702951578" status:"pending" uuid:"6586bc55-0363-4b29-8311-5f6f3db90354"]
+---
+time 1702951637
+new [description:"Support collision and out-of-bounds detect and general event system for entity pooling" entry:"1702951637" modified:"1702951637" status:"pending" uuid:"9e51059b-45e1-4fa2-bf21-e95a2b418abb"]
+---
+time 1702951709
+old [description:"Support collision and out-of-bounds detect and general event system for entity pooling" entry:"1702951637" modified:"1702951637" status:"pending" uuid:"9e51059b-45e1-4fa2-bf21-e95a2b418abb"]
+new [description:"Support collision and out-of-bounds detect and general event system for entity pooling" entry:"1702951637" modified:"1702951709" status:"pending" tags:"next" tags_next:"x" uuid:"9e51059b-45e1-4fa2-bf21-e95a2b418abb"]
+---
+time 1702952371
+new [description:"Implement full event system" entry:"1702952371" modified:"1702952371" status:"pending" uuid:"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56"]
+---
+time 1702952377
+old [description:"Implement full event system" entry:"1702952371" modified:"1702952371" status:"pending" uuid:"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56"]
+new [description:"Implement full event system" entry:"1702952371" modified:"1702952377" status:"pending" tags:"next" tags_next:"x" uuid:"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56"]
+---
+time 1702952393
+old [description:"Support collision and out-of-bounds detect and general event system for entity pooling" entry:"1702951637" modified:"1702951709" status:"pending" tags:"next" tags_next:"x" uuid:"9e51059b-45e1-4fa2-bf21-e95a2b418abb"]
+new [dep_d344bd6c-7ed1-41ca-a4bc-55c4822c4e56:"x" depends:"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56" description:"Support collision and out-of-bounds detect and general event system for entity pooling" entry:"1702951637" modified:"1702952393" status:"pending" tags_next:"x" uuid:"9e51059b-45e1-4fa2-bf21-e95a2b418abb"]
+---

@@ -10,3 +10,7 @@
 [description:"Refactor app to provide video wrapper API" entry:"1702923280" modified:"1702923280" status:"pending" uuid:"1bb90f24-0f7c-43f4-9ce2-2699a15ce290"]
 [dep_13918069-d50b-41bf-9efa-28d609155368:"x" dep_ae74ae4d-9850-4934-910d-07afca9bda5a:"x" depends:"13918069-d50b-41bf-9efa-28d609155368,ae74ae4d-9850-4934-910d-07afca9bda5a" description:"Split apart FSM states utilizing new generalized entity pool" entry:"1702924128" modified:"1702924163" status:"pending" uuid:"3b6aeb40-c38a-4f25-8644-450b254e156d"]
 [description:"Refactor entities to support dispatch points required to allow pooling" entry:"1702950863" modified:"1702951040" priority:"H" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
+[description:"Add `on collision` event handler to entities" entry:"1702951571" modified:"1702951571" status:"pending" uuid:"d7bf2c7b-8678-414e-8487-9214badb5711"]
+[description:"Add `on out of bounds` event handler to entities" entry:"1702951578" modified:"1702951578" status:"pending" uuid:"6586bc55-0363-4b29-8311-5f6f3db90354"]
+[dep_d344bd6c-7ed1-41ca-a4bc-55c4822c4e56:"x" depends:"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56" description:"Support collision and out-of-bounds detect and general event system for entity pooling" entry:"1702951637" modified:"1702952393" status:"pending" tags_next:"x" uuid:"9e51059b-45e1-4fa2-bf21-e95a2b418abb"]
+[description:"Implement full event system" entry:"1702952371" modified:"1702952377" status:"pending" tags:"next" tags_next:"x" uuid:"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56"]
