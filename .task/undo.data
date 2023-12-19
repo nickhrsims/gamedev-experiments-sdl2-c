@@ -131,3 +131,6 @@ time 1702950238
 old [description:"Make AABB\/Rect a first-party datatype for 'app' layer" entry:"1702919946" modified:"1702919946" status:"pending" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
 new [description:"Make AABB\/Rect a first-party datatype for 'app' layer" end:"1702950238" entry:"1702919946" modified:"1702950238" status:"completed" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
 ---
+time 1702950863
+new [description:"Refactor all elements referenced directly by `game` to support generalized function pointers for dispatch" entry:"1702950863" modified:"1702950863" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
+---
