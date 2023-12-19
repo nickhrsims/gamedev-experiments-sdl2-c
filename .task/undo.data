@@ -134,3 +134,15 @@ new [description:"Make AABB\/Rect a first-party datatype for 'app' layer" end:"1
 time 1702950863
 new [description:"Refactor all elements referenced directly by `game` to support generalized function pointers for dispatch" entry:"1702950863" modified:"1702950863" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
 ---
+time 1702950942
+old [dep_7fdb38c8-77b4-4c08-b12e-584aad414f69:"x" depends:"7fdb38c8-77b4-4c08-b12e-584aad414f69" description:"Refactor game to remove static data members" entry:"1702923266" modified:"1702924799" priority:"H" status:"pending" uuid:"ae74ae4d-9850-4934-910d-07afca9bda5a"]
+new [dep_17c0d100-6e13-42d7-9833-52afbc097525:"x" dep_7fdb38c8-77b4-4c08-b12e-584aad414f69:"x" depends:"17c0d100-6e13-42d7-9833-52afbc097525,7fdb38c8-77b4-4c08-b12e-584aad414f69" description:"Refactor game to remove static data members" entry:"1702923266" modified:"1702950942" priority:"H" status:"pending" uuid:"ae74ae4d-9850-4934-910d-07afca9bda5a"]
+---
+time 1702950986
+old [description:"Refactor all elements referenced directly by `game` to support generalized function pointers for dispatch" entry:"1702950863" modified:"1702950863" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
+new [description:"Refactor all elements referenced directly by `game` to support generalized function pointers for dispatch" entry:"1702950863" modified:"1702950986" priority:"H" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
+---
+time 1702951040
+old [description:"Refactor all elements referenced directly by `game` to support generalized function pointers for dispatch" entry:"1702950863" modified:"1702950986" priority:"H" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
+new [description:"Refactor entities to support dispatch points required to allow pooling" entry:"1702950863" modified:"1702951040" priority:"H" status:"pending" uuid:"17c0d100-6e13-42d7-9833-52afbc097525"]
+---

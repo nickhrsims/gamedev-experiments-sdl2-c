@@ -1,3 +1,4 @@
+[description:"Make AABB\/Rect a first-party datatype for 'app' layer" end:"1702950238" entry:"1702919946" modified:"1702950238" status:"completed" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
 [description:"Add support for entities to allocate (provide init functions)" end:"1702950221" entry:"1702924766" modified:"1702950221" priority:"H" status:"completed" uuid:"7fdb38c8-77b4-4c08-b12e-584aad414f69"]
 [description:"Refactor: Write function-based API for configuring dynamic struct-based fsm." end:"1702913417" entry:"1702663153" modified:"1702913417" status:"completed" uuid:"7d9b7761-4881-4c62-b98c-d0a72b9023ed"]
 [description:"Support: unit tests" end:"1702913430" entry:"1702663227" modified:"1702913430" status:"completed" uuid:"ebff1f15-dee6-4d5a-914f-1b9aecfcb2d9"]
