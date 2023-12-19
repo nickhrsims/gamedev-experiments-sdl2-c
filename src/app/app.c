@@ -2,10 +2,11 @@
 
 #include "SDL.h"
 
-#include "alloc.h"
-#include "app/app.h"
-#include "app/video.h"
 #include "log.h"
+
+#include "alloc.h"
+#include "app.h"
+#include "video.h"
 
 // --- Window
 #define DEFAULT_WINDOW_FLAGS 0
