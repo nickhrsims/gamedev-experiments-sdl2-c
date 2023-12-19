@@ -16,14 +16,6 @@
 #include "paddle.h"
 #include "player.h"
 
-/*
-  NOTE: Last thing I was doing:
-
-  Refactoring entity directory into `game/`, after setting up entities
-  to allocate themselves and remove them from static allocation.
-
-*/
-
 // -----------------------------------------------------------------------------
 // Core Data Types
 // -----------------------------------------------------------------------------
