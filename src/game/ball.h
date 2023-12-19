@@ -8,6 +8,11 @@
 void ball_configure(entity_t *ball, aabb_t *field);
 
 /**
+ * Initialize new ball.
+ */
+entity_t *ball_init(aabb_t *field);
+
+/**
  * Reverse the current direction of the ball.
  */
 void ball_reverse_direction(entity_t *ball);

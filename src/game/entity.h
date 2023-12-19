@@ -14,6 +14,7 @@ typedef struct entity_s {
   int vx;
   int vy;
   void (*update)(struct entity_s *, float);
+  void (*destroy)(struct entity_s *);
   void *data;
 } entity_t;
 
@@ -38,6 +39,6 @@ void entity_set_aabb(entity_t *entity, aabb_t *aabb);
 /**
  * Like it's AABB variant, but wraps an entity.
  */
-bool entity_is_beyond_edge(entity_t *entity, aabb_t *box, edge_t edge);
+bool entity_is_beyond_edge(entity_t *entity, aabb_t *box, aabb_edge_t edge);
 
 void entity_set_direction(entity_t *e, direction_t dir);

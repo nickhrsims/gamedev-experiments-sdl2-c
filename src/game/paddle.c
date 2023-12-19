@@ -1,5 +1,5 @@
 #include "paddle.h"
-#include "entities/entity.h"
+#include "entity.h"
 #include "log.h"
 
 // --- Field Section Horizontal Ratio
@@ -84,6 +84,11 @@ void paddle_configure(entity_t *paddle, aabb_t *field, paddle_identifier_t ident
     // --- Velocity
     entity_set_velocity(paddle, 0, 0);
 
-    // --- Update Callback
     paddle->update = update;
+}
+
+entity_t *paddle_init(aabb_t *field, paddle_identifier_t identifier) {
+    entity_t *paddle = entity_init();
+    paddle_configure(paddle, field, identifier);
+    return paddle;
 }

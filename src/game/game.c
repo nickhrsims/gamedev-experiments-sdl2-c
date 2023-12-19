@@ -4,21 +4,35 @@
 
 #include "SDL_scancode.h"
 
+#include "aabb.h"
 #include "alloc.h"
 #include "app/app.h"
 #include "app/video.h"
-#include "entities/ball.h"
-#include "entities/entity.h"
-#include "entities/paddle.h"
+#include "ball.h"
+#include "entity.h"
 #include "field.h"
 #include "fsm/fsm.h"
 #include "game.h"
-#include "physics.h"
+#include "paddle.h"
 #include "player.h"
+
+/*
+  NOTE: Last thing I was doing:
+
+  Refactoring entity directory into `game/`, after setting up entities
+  to allocate themselves and remove them from static allocation.
+
+*/
 
 // -----------------------------------------------------------------------------
 // Core Data Types
 // -----------------------------------------------------------------------------
+
+// NOTE: Current entity pool should be immutable.
+typedef struct entity_pool_s {
+    size_t entity_count;
+    entity_t *entities;
+} entity_pool_t;
 
 /**
  * Game. Sub type of App.
@@ -216,47 +230,47 @@ static void apply_collision_to_ball(void) {
         entity_set_direction(&ball, DIR_UP);
     }
 
-    switch (physics_get_collision(&ball, &left_paddle)) {
-    case COLLIDING_ON_LEFT:
+    switch (aabb_get_intersection(&ball_box, &lpad_box)) {
+    case AABB_LEFT_EDGE:
         log_debug("LEFT");
         entity_set_direction(&ball, DIR_RIGHT);
         break;
-    case COLLIDING_ON_RIGHT:
+    case AABB_RIGHT_EDGE:
         log_debug("RIGHT");
         entity_set_direction(&ball, DIR_LEFT);
         break;
-    case COLLIDING_ON_TOP:
+    case AABB_TOP_EDGE:
         log_debug("TOP");
         entity_set_direction(&ball, DIR_DOWN);
         break;
-    case COLLIDING_ON_BOTTOM:
+    case AABB_BOTTOM_EDGE:
         log_debug("BOTTOM");
         entity_set_direction(&ball, DIR_UP);
         break;
-    case NOT_COLLIDING:
+    case AABB_NO_EDGE:
         break;
     default:
         break;
     }
 
-    switch (physics_get_collision(&ball, &right_paddle)) {
-    case COLLIDING_ON_LEFT:
+    switch (aabb_get_intersection(&ball_box, &rpad_box)) {
+    case AABB_LEFT_EDGE:
         log_debug("LEFT");
         entity_set_direction(&ball, DIR_RIGHT);
         break;
-    case COLLIDING_ON_RIGHT:
+    case AABB_RIGHT_EDGE:
         log_debug("RIGHT");
         entity_set_direction(&ball, DIR_LEFT);
         break;
-    case COLLIDING_ON_TOP:
+    case AABB_TOP_EDGE:
         log_debug("TOP");
         entity_set_direction(&ball, DIR_DOWN);
         break;
-    case COLLIDING_ON_BOTTOM:
+    case AABB_BOTTOM_EDGE:
         log_debug("BOTTOM");
         entity_set_direction(&ball, DIR_UP);
         break;
-    case NOT_COLLIDING:
+    case AABB_NO_EDGE:
         break;
     default:
         break;

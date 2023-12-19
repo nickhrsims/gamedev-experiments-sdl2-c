@@ -112,3 +112,22 @@ time 1702924574
 old [description:"Refactor game to remove static data members" entry:"1702923266" modified:"1702923266" status:"pending" uuid:"ae74ae4d-9850-4934-910d-07afca9bda5a"]
 new [description:"Refactor game to remove static data members" entry:"1702923266" modified:"1702924574" priority:"H" status:"pending" uuid:"ae74ae4d-9850-4934-910d-07afca9bda5a"]
 ---
+time 1702924766
+new [description:"Add support for entities to allocate (provide init functions)" entry:"1702924766" modified:"1702924766" status:"pending" uuid:"7fdb38c8-77b4-4c08-b12e-584aad414f69"]
+---
+time 1702924799
+old [description:"Refactor game to remove static data members" entry:"1702923266" modified:"1702924574" priority:"H" status:"pending" uuid:"ae74ae4d-9850-4934-910d-07afca9bda5a"]
+new [dep_7fdb38c8-77b4-4c08-b12e-584aad414f69:"x" depends:"7fdb38c8-77b4-4c08-b12e-584aad414f69" description:"Refactor game to remove static data members" entry:"1702923266" modified:"1702924799" priority:"H" status:"pending" uuid:"ae74ae4d-9850-4934-910d-07afca9bda5a"]
+---
+time 1702924825
+old [description:"Add support for entities to allocate (provide init functions)" entry:"1702924766" modified:"1702924766" status:"pending" uuid:"7fdb38c8-77b4-4c08-b12e-584aad414f69"]
+new [description:"Add support for entities to allocate (provide init functions)" entry:"1702924766" modified:"1702924825" priority:"H" status:"pending" uuid:"7fdb38c8-77b4-4c08-b12e-584aad414f69"]
+---
+time 1702950221
+old [description:"Add support for entities to allocate (provide init functions)" entry:"1702924766" modified:"1702924825" priority:"H" status:"pending" uuid:"7fdb38c8-77b4-4c08-b12e-584aad414f69"]
+new [description:"Add support for entities to allocate (provide init functions)" end:"1702950221" entry:"1702924766" modified:"1702950221" priority:"H" status:"completed" uuid:"7fdb38c8-77b4-4c08-b12e-584aad414f69"]
+---
+time 1702950238
+old [description:"Make AABB\/Rect a first-party datatype for 'app' layer" entry:"1702919946" modified:"1702919946" status:"pending" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
+new [description:"Make AABB\/Rect a first-party datatype for 'app' layer" end:"1702950238" entry:"1702919946" modified:"1702950238" status:"completed" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
+---

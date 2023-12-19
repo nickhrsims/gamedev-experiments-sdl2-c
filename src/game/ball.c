@@ -1,7 +1,7 @@
 #include <stdlib.h>
 
 #include "ball.h"
-#include "entities/entity.h"
+#include "entity.h"
 
 // --- Size Ratio (Larger value means smaller size)
 //     (40 ~= (640 > 480) -> 640/40 = size 16 ball)
@@ -35,6 +35,12 @@ void ball_configure(entity_t *ball, aabb_t *field) {
     entity_set_velocity(ball, random_vx, random_vy);
 
     ball->update = update;
+}
+
+entity_t *ball_init(aabb_t *field) {
+    entity_t *ball = entity_init();
+    ball_configure(ball, field);
+    return ball;
 }
 
 /**

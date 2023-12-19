@@ -1,5 +1,5 @@
 #include "field.h"
-#include "entities/entity.h"
+#include "entity.h"
 
 /**
  * Check of `subject` has crossed left threshold of `field`.

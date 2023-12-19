@@ -15,7 +15,11 @@ entity_t *entity_init(void) {
 /**
  * Destroy an existing entity.
  */
-void entity_term(entity_t *e) { free(e); }
+void entity_term(entity_t *e) {
+    if (e->destroy)
+        e->destroy(e);
+    free(e);
+}
 
 /**
  * Get the position of a given entity.
@@ -103,7 +107,7 @@ void entity_set_aabb(entity_t *e, aabb_t *aabb) {
 /**
  * Is entity `e` beyond box `boundary` of specific `edge`.
  */
-bool entity_is_beyond_edge(entity_t *e, aabb_t *boundary, edge_t edge) {
+bool entity_is_beyond_edge(entity_t *e, aabb_t *boundary, aabb_edge_t edge) {
     aabb_t entity_box;
     entity_get_aabb(e, &entity_box);
     return aabb_is_beyond_edge(&entity_box, boundary, edge);
