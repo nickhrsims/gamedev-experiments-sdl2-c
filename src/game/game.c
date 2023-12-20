@@ -372,10 +372,16 @@ void game_term(game_t *game) {
     app_term(game->app);
 }
 
+static void game_process_event(app_t *app, event_t *event) {
+    (void)app;
+    (void)event;
+    return;
+}
+
 /**
  * Execute game processing blocks based on current game state.
  */
-bool game_process_frame(app_t *app, float delta) {
+static bool game_process_frame(app_t *app, float delta) {
     switch (fsm_state(fsm)) {
     case START_STATE: // Start State
         fsm_trigger(fsm, ALWAYS_TRIGGER);
@@ -396,4 +402,6 @@ bool game_process_frame(app_t *app, float delta) {
     return true;
 }
 
-void game_run(game_t *game) { app_run(game->app, game_process_frame); }
+void game_run(game_t *game) {
+    app_run(game->app, game_process_frame, game_process_event);
+}

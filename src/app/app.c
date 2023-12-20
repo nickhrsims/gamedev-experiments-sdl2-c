@@ -41,10 +41,8 @@ void app_term(app_t *app) {
     SDL_Quit();
 }
 
-void app_run(app_t *app, frame_processor_t process_frame) {
-    /** Input Event Processing */
-    SDL_Event event;
-
+void app_run(app_t *app, frame_processor_t process_frame,
+             event_processor_t process_event) {
     /** CPU ticks at the start of the last frame. */
     uint64_t prev_frame_ticks = SDL_GetTicks64();
 
@@ -76,7 +74,11 @@ void app_run(app_t *app, frame_processor_t process_frame) {
         delta            = (curr_frame_ticks - prev_frame_ticks) / 1000.0f;
 
         // --- Poll input events
-        SDL_PollEvent(&event);
+        /** Input Event Processing */
+        SDL_Event event;
+        while (SDL_PollEvent(&event)) {
+            process_event(app, &event);
+        }
 
         // --- Process Frame
         is_app_running = process_frame(app, delta);
