@@ -47,3 +47,4 @@
 {"description":"Implement full event system","entry":"20231219T021931Z","modified":"20231219T021931Z","status":"pending","uuid":"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56"}
 {"description":"Implement full event system","entry":"20231219T021931Z","modified":"20231219T021937Z","status":"pending","uuid":"d344bd6c-7ed1-41ca-a4bc-55c4822c4e56","tags":["next"]}
 {"description":"Support collision and out-of-bounds detect and general event system for entity pooling","entry":"20231219T020717Z","modified":"20231219T021953Z","status":"pending","uuid":"9e51059b-45e1-4fa2-bf21-e95a2b418abb","tags":["next"],"depends":["d344bd6c-7ed1-41ca-a4bc-55c4822c4e56"]}
+{"description":"Implement doubly linked list for event subscribers for O(n) walking and O(1) observer removal","entry":"20231219T024448Z","modified":"20231219T024448Z","status":"pending","uuid":"9e4da082-4f55-43f6-9855-e4ba983c3805"}
