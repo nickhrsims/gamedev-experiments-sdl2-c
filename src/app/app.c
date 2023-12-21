@@ -78,15 +78,15 @@ void app_run(app_t *app, frame_processor_t process_frame,
         SDL_Event event;
         while (SDL_PollEvent(&event)) {
             process_event(app, &event);
+            // --- Check OS-level quit request
+            if (event.type == SDL_QUIT) {
+                is_app_running = false;
+                break;
+            }
         }
 
         // --- Process Frame
         is_app_running = process_frame(app, delta);
-
-        // --- Check OS-level quit request
-        if (event.type == SDL_QUIT) {
-            is_app_running = false;
-        }
 
         // --- End Frame Timing
         //

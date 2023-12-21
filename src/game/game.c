@@ -2,12 +2,14 @@
 
 #include <log.h>
 
+#include "SDL_events.h"
 #include "SDL_scancode.h"
+
+#include "app/app.h"
+#include "app/video.h"
 
 #include "aabb.h"
 #include "alloc.h"
-#include "app/app.h"
-#include "app/video.h"
 #include "ball.h"
 #include "entity.h"
 #include "field.h"
@@ -366,13 +368,12 @@ game_t *game_init(app_config_t *config) {
     return game;
 }
 
-// NOTE: UNUSED
 void game_term(game_t *game) {
     terminate_game_fsm(fsm);
     app_term(game->app);
 }
 
-static void game_process_event(app_t *app, event_t *event) {
+static void game_process_event(app_t *app, SDL_Event *event) {
     (void)app;
     (void)event;
     return;

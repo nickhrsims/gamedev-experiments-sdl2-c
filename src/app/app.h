@@ -20,11 +20,8 @@ typedef struct {
   video_t *video;
 } app_t;
 
-// Aliased for type naming convention sanity.
-typedef SDL_Event event_t;
-
 typedef bool (*frame_processor_t)(app_t *, float);
-typedef void (*event_processor_t)(app_t *, event_t *event);
+typedef void (*event_processor_t)(app_t *, SDL_Event *event);
 
 // TODO: Redesign relationship to app allocation
 app_t *app_init(app_config_t *config);
