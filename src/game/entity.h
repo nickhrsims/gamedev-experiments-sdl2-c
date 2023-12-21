@@ -13,10 +13,11 @@ typedef struct entity_s {
   int h;
   int vx;
   int vy;
-  void (*update)(struct entity_s *, float);
-  void (*destroy)(struct entity_s *);
-  void (*collide)(struct entity_s *, aabb_edge_t edge);
-  void (*out_of_bounds)(struct entity_s *, aabb_edge_t edge);
+  void (*update)(struct entity_s *self, float delta);
+  void (*destroy)(struct entity_s *self);
+  void (*collide)(struct entity_s *self, struct entity_s *collider,
+                  aabb_edge_t edge);
+  void (*out_of_bounds)(struct entity_s *self, aabb_edge_t edge);
   void *data;
 } entity_t;
 
