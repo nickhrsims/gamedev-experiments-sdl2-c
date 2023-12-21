@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "aabb.h"
 #include "ball.h"
 #include "entity.h"
 
@@ -13,6 +14,41 @@
 static void update(entity_t *ball, float delta) {
     ball->x += (int)(ball->vx * delta);
     ball->y += (int)(ball->vy * delta);
+}
+
+static void collide(entity_t *self, entity_t *collider, aabb_edge_t edge) {
+    (void)collider;
+    switch (edge) {
+    case AABB_LEFT_EDGE:
+        entity_set_direction(self, DIR_RIGHT);
+        break;
+    case AABB_RIGHT_EDGE:
+        entity_set_direction(self, DIR_LEFT);
+        break;
+    case AABB_TOP_EDGE:
+        entity_set_direction(self, DIR_DOWN);
+        break;
+    case AABB_BOTTOM_EDGE:
+        entity_set_direction(self, DIR_UP);
+        break;
+    case AABB_NO_EDGE:
+        break;
+    default:
+        break;
+    }
+}
+
+static void out_of_bounds(entity_t *self, aabb_edge_t edge) {
+    switch (edge) {
+    case AABB_TOP_EDGE:
+        entity_set_direction(self, DIR_DOWN);
+        break;
+    case AABB_BOTTOM_EDGE:
+        entity_set_direction(self, DIR_UP);
+        break;
+    default:
+        break;
+    }
 }
 
 /**
@@ -34,7 +70,9 @@ void ball_configure(entity_t *ball, aabb_t *field) {
     int random_vy = floor(((double)rand() / (double)RAND_MAX) * BALL_VELOCITY_SCALE);
     entity_set_velocity(ball, random_vx, random_vy);
 
-    ball->update = update;
+    ball->update        = update;
+    ball->collide       = collide;
+    ball->out_of_bounds = out_of_bounds;
 }
 
 entity_t *ball_init(aabb_t *field) {

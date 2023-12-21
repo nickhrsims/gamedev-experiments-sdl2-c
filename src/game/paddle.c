@@ -1,4 +1,5 @@
 #include "paddle.h"
+#include "aabb.h"
 #include "entity.h"
 #include "log.h"
 
@@ -13,6 +14,19 @@
 static void update(entity_t *paddle, float delta) {
     paddle->x += (int)(paddle->vx * delta);
     paddle->y += (int)(paddle->vy * delta);
+}
+
+static void out_of_bounds(entity_t *self, aabb_edge_t edge) {
+    switch (edge) {
+    case AABB_TOP_EDGE:
+        entity_set_direction(self, DIR_DOWN);
+        break;
+    case AABB_BOTTOM_EDGE:
+        entity_set_direction(self, DIR_UP);
+        break;
+    default:
+        break;
+    }
 }
 
 /**
@@ -84,7 +98,8 @@ void paddle_configure(entity_t *paddle, aabb_t *field, paddle_identifier_t ident
     // --- Velocity
     entity_set_velocity(paddle, 0, 0);
 
-    paddle->update = update;
+    paddle->update        = update;
+    paddle->out_of_bounds = out_of_bounds;
 }
 
 entity_t *paddle_init(aabb_t *field, paddle_identifier_t identifier) {

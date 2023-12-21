@@ -1,6 +1,7 @@
 #include <SDL2/SDL.h>
 
 #include <log.h>
+#include <stddef.h>
 
 #include "SDL_events.h"
 #include "SDL_scancode.h"
@@ -208,86 +209,44 @@ static void check_goal_conditions(void) {
 // Per-State Processing Blocks
 // -------------------------------------
 
-static void apply_collision_to_ball(void) {
-
-    aabb_t ball_box;
-    aabb_t lpad_box;
-    aabb_t rpad_box;
-
-    entity_get_aabb(&ball, &ball_box);
-    entity_get_aabb(&left_paddle, &lpad_box);
-    entity_get_aabb(&right_paddle, &rpad_box);
-
-    if (aabb_is_beyond_edge(&ball_box, &field, AABB_TOP_EDGE)) {
-        entity_set_direction(&ball, DIR_DOWN);
-    } else if (aabb_is_beyond_edge(&ball_box, &field, AABB_BOTTOM_EDGE)) {
-        entity_set_direction(&ball, DIR_UP);
-    }
-
-    switch (aabb_get_intersection(&ball_box, &lpad_box)) {
-    case AABB_LEFT_EDGE:
-        log_debug("LEFT");
-        entity_set_direction(&ball, DIR_RIGHT);
-        break;
-    case AABB_RIGHT_EDGE:
-        log_debug("RIGHT");
-        entity_set_direction(&ball, DIR_LEFT);
-        break;
-    case AABB_TOP_EDGE:
-        log_debug("TOP");
-        entity_set_direction(&ball, DIR_DOWN);
-        break;
-    case AABB_BOTTOM_EDGE:
-        log_debug("BOTTOM");
-        entity_set_direction(&ball, DIR_UP);
-        break;
-    case AABB_NO_EDGE:
-        break;
-    default:
-        break;
-    }
-
-    switch (aabb_get_intersection(&ball_box, &rpad_box)) {
-    case AABB_LEFT_EDGE:
-        log_debug("LEFT");
-        entity_set_direction(&ball, DIR_RIGHT);
-        break;
-    case AABB_RIGHT_EDGE:
-        log_debug("RIGHT");
-        entity_set_direction(&ball, DIR_LEFT);
-        break;
-    case AABB_TOP_EDGE:
-        log_debug("TOP");
-        entity_set_direction(&ball, DIR_DOWN);
-        break;
-    case AABB_BOTTOM_EDGE:
-        log_debug("BOTTOM");
-        entity_set_direction(&ball, DIR_UP);
-        break;
-    case AABB_NO_EDGE:
-        break;
-    default:
-        break;
+static void collide_entities(size_t entity_count, entity_t *entity_pool[entity_count]) {
+    aabb_t subject_box, collider_box;
+    for (size_t subject_index = 0; subject_index < entity_count; subject_index++) {
+        entity_t *subject = entity_pool[subject_index];
+        entity_get_aabb(subject, &subject_box);
+        for (size_t collider_index = 0; collider_index < entity_count;
+             collider_index++) {
+            if (subject_index == collider_index)
+                continue;
+            entity_t *collider = entity_pool[collider_index];
+            entity_get_aabb(collider, &collider_box);
+            aabb_edge_t intersection =
+                aabb_get_intersection(&subject_box, &collider_box);
+            if (intersection && subject->collide) {
+                subject->collide(subject, collider, intersection);
+            }
+        }
     }
 }
 
-static void apply_collision_to_paddles(void) {
-    aabb_t lpad_box;
-    aabb_t rpad_box;
-
-    entity_get_aabb(&left_paddle, &lpad_box);
-    entity_get_aabb(&right_paddle, &rpad_box);
-
-    if (aabb_is_beyond_edge(&lpad_box, &field, AABB_TOP_EDGE)) {
-        entity_set_direction(&left_paddle, DIR_DOWN);
-    } else if (aabb_is_beyond_edge(&lpad_box, &field, AABB_BOTTOM_EDGE)) {
-        entity_set_direction(&left_paddle, DIR_UP);
-    }
-
-    if (aabb_is_beyond_edge(&rpad_box, &field, AABB_TOP_EDGE)) {
-        entity_set_direction(&right_paddle, DIR_DOWN);
-    } else if (aabb_is_beyond_edge(&rpad_box, &field, AABB_BOTTOM_EDGE)) {
-        entity_set_direction(&right_paddle, DIR_UP);
+static void out_of_bounds_collide_entities(size_t entity_count,
+                                           entity_t *entity_pool[entity_count],
+                                           aabb_t *field) {
+    aabb_t subject_box;
+    for (size_t subject_index = 0; subject_index < entity_count; subject_index++) {
+        entity_t *subject = entity_pool[subject_index];
+        entity_get_aabb(subject, &subject_box);
+        if (subject->out_of_bounds) {
+            if (aabb_is_beyond_edge(&subject_box, field, AABB_TOP_EDGE)) {
+                subject->out_of_bounds(subject, AABB_TOP_EDGE);
+            } else if (aabb_is_beyond_edge(&subject_box, field, AABB_BOTTOM_EDGE)) {
+                subject->out_of_bounds(subject, AABB_BOTTOM_EDGE);
+            } else if (aabb_is_beyond_edge(&subject_box, field, AABB_LEFT_EDGE)) {
+                subject->out_of_bounds(subject, AABB_LEFT_EDGE);
+            } else if (aabb_is_beyond_edge(&subject_box, field, AABB_RIGHT_EDGE)) {
+                subject->out_of_bounds(subject, AABB_RIGHT_EDGE);
+            }
+        }
     }
 }
 
@@ -305,9 +264,10 @@ static void update_entities(size_t entity_count, entity_t *entity_pool[entity_co
  * TODO: Separate main loop against game loop
  */
 void do_update_process(float delta) {
-    apply_collision_to_ball();
-    apply_collision_to_paddles();
-    update_entities(3, (entity_t *[3]){&ball, &left_paddle, &right_paddle}, delta);
+    entity_t *entity_pool[3] = {&ball, &left_paddle, &right_paddle};
+    collide_entities(3, entity_pool);
+    out_of_bounds_collide_entities(3, entity_pool, &field);
+    update_entities(3, entity_pool, delta);
     check_goal_conditions();
 }
 
