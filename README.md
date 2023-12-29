@@ -1,4 +1,4 @@
-# Game Development Experiments (SDL2 + C)
+# Pong (SDL2 + C)
 
 Experimental practice project.
 
