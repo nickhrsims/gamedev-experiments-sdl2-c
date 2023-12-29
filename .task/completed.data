@@ -1,8 +1,0 @@
-[description:"Make AABB\/Rect a first-party datatype for 'app' layer" end:"1702950238" entry:"1702919946" modified:"1702950238" status:"completed" uuid:"2d7f5981-ad8b-4ccb-a448-c8deec8cc589"]
-[description:"Add support for entities to allocate (provide init functions)" end:"1702950221" entry:"1702924766" modified:"1702950221" priority:"H" status:"completed" uuid:"7fdb38c8-77b4-4c08-b12e-584aad414f69"]
-[description:"Refactor: Write function-based API for configuring dynamic struct-based fsm." end:"1702913417" entry:"1702663153" modified:"1702913417" status:"completed" uuid:"7d9b7761-4881-4c62-b98c-d0a72b9023ed"]
-[description:"Support: unit tests" end:"1702913430" entry:"1702663227" modified:"1702913430" status:"completed" uuid:"ebff1f15-dee6-4d5a-914f-1b9aecfcb2d9"]
-[description:"Simplify paddle velocity control block." end:"1702661931" entry:"1702493268" modified:"1702661931" status:"completed" uuid:"a59dce23-eff7-4ee2-b848-e0b77e774f42"]
-[description:"Refactor: Support entity data." end:"1702658289" entry:"1702499371" modified:"1702658291" status:"deleted" uuid:"9bd44c93-f2c7-460e-be94-10c1fb9ec56d"]
-[dep_a59dce23-eff7-4ee2-b848-e0b77e774f42:"x" depends:"a59dce23-eff7-4ee2-b848-e0b77e774f42" description:"Refactor input actions around new entity motion." end:"1702658252" entry:"1702493296" modified:"1702658254" status:"deleted" uuid:"73b28414-519c-402b-bc35-eda9a1e751cf"]
-[description:"Hello" end:"1702492997" entry:"1702492970" modified:"1702492999" status:"deleted" uuid:"77e2b64e-d175-4240-8d20-5d105821b3e1"]
