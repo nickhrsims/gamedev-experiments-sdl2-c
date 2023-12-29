@@ -1,2 +1,2 @@
 #!/usr/bin/env bash
-conan build . --output-folder=build --build=missing
+conan build . --output-folder=build --build=missing --settings=build_type=Debug
