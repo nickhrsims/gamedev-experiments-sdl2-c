@@ -289,6 +289,7 @@ static void game_process_frame(app_t *app, float delta) {
         break;
     case TERM_STATE: // Stop State
         app_stop(app);
+        break;
     // TODO:  Panic on unknown state!
     default:
         log_error("Reached unknown state (%d)", fsm_state(fsm));
