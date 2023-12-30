@@ -18,8 +18,9 @@
  */
 app_t *app_init(app_config_t *config) {
 
-    app_t *app = new (app_t);
-    app->video = NULL;
+    app_t *app   = new (app_t);
+    app->video   = NULL;
+    app->running = false;
 
     log_set_level(LOG_DEBUG);
 
@@ -53,6 +54,10 @@ void app_term(app_t *app) {
 
 void app_run(app_t *app, frame_processor_t process_frame,
              event_processor_t process_event) {
+
+    // Set running flag.
+    app->running = true;
+
     /** CPU ticks at the start of the last frame. */
     uint64_t prev_frame_ticks = SDL_GetTicks64();
 
@@ -71,11 +76,8 @@ void app_run(app_t *app, frame_processor_t process_frame,
     /** Time between frames. Measured in seconds. */
     float delta = 0;
 
-    /** Execution flag. */
-    static bool is_app_running = true;
-
     // --- Application Loop
-    while (is_app_running) {
+    while (app->running) {
 
         // --- Start Frame Timing
 
@@ -90,13 +92,13 @@ void app_run(app_t *app, frame_processor_t process_frame,
             process_event(app, &event);
             // --- Check OS-level quit request
             if (event.type == SDL_QUIT) {
-                is_app_running = false;
+                app->running = false;
                 break;
             }
         }
 
         // --- Process Frame
-        is_app_running = process_frame(app, delta);
+        process_frame(app, delta);
 
         // --- End Frame Timing
         //
@@ -119,3 +121,4 @@ void app_run(app_t *app, frame_processor_t process_frame,
 
     return;
 }
+void app_stop(app_t *app) { app->running = false; }

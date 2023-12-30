@@ -275,7 +275,7 @@ static void game_process_event(app_t *app, SDL_Event *event) {
 /**
  * Execute game processing blocks based on current game state.
  */
-static bool game_process_frame(app_t *app, float delta) {
+static void game_process_frame(app_t *app, float delta) {
 
     switch (fsm_state(fsm)) {
     case START_STATE: // Start State
@@ -288,13 +288,12 @@ static bool game_process_frame(app_t *app, float delta) {
         fsm_trigger(fsm, ALWAYS_TRIGGER);
         break;
     case TERM_STATE: // Stop State
-        return false;
+        app_stop(app);
     // TODO:  Panic on unknown state!
     default:
         log_error("Reached unknown state (%d)", fsm_state(fsm));
         break;
     }
-    return true;
 }
 
 void game_run(game_t *game) {
