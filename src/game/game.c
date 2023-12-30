@@ -23,12 +23,6 @@
 // Core Data Types
 // -----------------------------------------------------------------------------
 
-// NOTE: Current entity pool should be immutable.
-typedef struct entity_pool_s {
-    size_t entity_count;
-    entity_t *entities;
-} entity_pool_t;
-
 /**
  * Game. Sub type of App.
  */
