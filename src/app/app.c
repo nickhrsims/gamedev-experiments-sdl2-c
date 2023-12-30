@@ -19,16 +19,22 @@
 app_t *app_init(app_config_t *config) {
 
     app_t *app = new (app_t);
+    app->video = NULL;
 
     log_set_level(LOG_DEBUG);
 
-    app->video = video_init(
-        &(video_cfg_t){.window_title         = config->window_title,
-                       .window_position_x    = config->window_position_x,
-                       .window_position_y    = config->window_position_y,
-                       .window_width         = config->window_width,
-                       .window_height        = config->window_height,
-                       .window_is_fullscreen = config->window_is_fullscreen});
+    if (!(app->video = video_init(
+              &(video_cfg_t){.window_title         = config->window_title,
+                             .window_position_x    = config->window_position_x,
+                             .window_position_y    = config->window_position_y,
+                             .window_width         = config->window_width,
+                             .window_height        = config->window_height,
+                             .window_is_fullscreen = config->window_is_fullscreen}))) {
+
+        log_error("Cannot initialize video sub-system");
+        app_term(app);
+        return NULL;
+    }
 
     return app;
 }
@@ -37,8 +43,12 @@ app_t *app_init(app_config_t *config) {
  * Terminate static applicaiton.
  */
 void app_term(app_t *app) {
+    if (!app) {
+        return;
+    }
     video_term(app->video);
     SDL_Quit();
+    delete (app);
 }
 
 void app_run(app_t *app, frame_processor_t process_frame,

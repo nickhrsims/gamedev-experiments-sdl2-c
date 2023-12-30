@@ -18,6 +18,10 @@ typedef struct {
 
 /**
  * Initialize video handle.
+ *
+ * \param config Video configuration.
+ * \returns video_t on success or NULL on error.
+ * \sa video_term
  */
 video_t *video_init(video_cfg_t *config);
 

@@ -1,6 +1,8 @@
 #include <SDL2/SDL.h>
 #include <SDL_ttf.h>
 
+#include "log.h"
+
 #include "alloc.h"
 #include "video.h"
 
@@ -15,36 +17,64 @@ typedef struct video_s {
 } video_t;
 
 video_t *video_init(video_cfg_t *config) {
-    video_t *v = new (video_t);
+    video_t *v  = new (video_t);
+    v->window   = NULL;
+    v->renderer = NULL;
+    v->font     = NULL;
 
-    SDL_InitSubSystem(SDL_INIT_VIDEO);
+    if (SDL_InitSubSystem(SDL_INIT_VIDEO)) {
+        log_error(SDL_GetError());
+        return NULL;
+    }
 
     // --- Window
-    v->window = SDL_CreateWindow(
-        config->window_title, config->window_position_x, config->window_position_y,
-        config->window_width, config->window_height,
-        config->window_is_fullscreen ? SDL_WINDOW_FULLSCREEN : 0);
+    if (!(v->window = SDL_CreateWindow(
+              config->window_title, config->window_position_x,
+              config->window_position_y, config->window_width, config->window_height,
+              config->window_is_fullscreen ? SDL_WINDOW_FULLSCREEN : 0))) {
+        log_error(SDL_GetError());
+        log_error("Cannot create window");
+        return NULL;
+    }
 
     // --- Renderer
     // No use for variable index or flags.
     static unsigned char const RENDERER_INDEX = 0;
     static unsigned char const RENDERER_FLAGS = 0;
 
-    v->renderer = SDL_CreateRenderer(v->window, RENDERER_INDEX, RENDERER_FLAGS);
+    if (!(v->renderer =
+              SDL_CreateRenderer(v->window, RENDERER_INDEX, RENDERER_FLAGS))) {
+        video_term(v);
+        log_error(SDL_GetError());
+        return NULL;
+    }
 
     // --- Font
     // TODO: Generalize font selection
-    TTF_Init();
-    v->font = TTF_OpenFont("res/font.ttf", 24);
+    if (TTF_Init() < 0) {
+        video_term(v);
+        log_error(TTF_GetError());
+        return NULL;
+    }
+
+    if (!(v->font = TTF_OpenFont("res/font.ttf", 24))) {
+        video_term(v);
+        log_error(TTF_GetError());
+        return NULL;
+    }
 
     return v;
 }
 
 void video_term(video_t *v) {
+    if (!v) {
+        return;
+    }
     TTF_CloseFont(v->font);
     SDL_DestroyRenderer(v->renderer);
     SDL_DestroyWindow(v->window);
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
+    delete (v);
 }
 
 /**
@@ -97,7 +127,12 @@ void video_draw_text(video_t *v, char *str, int x, int y) {
     SDL_Texture *texture = SDL_CreateTextureFromSurface(v->renderer, surface);
 
     SDL_RenderCopy(v->renderer, texture, NULL,
-                   &(SDL_Rect){x, y, surface->w, surface->h});
+                   &(SDL_Rect){
+                       x - (surface->w / 2),
+                       y - (surface->h / 2),
+                       surface->w,
+                       surface->h,
+                   });
 }
 
 void video_get_window_size(video_t *v, int *w, int *h) {

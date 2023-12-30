@@ -227,14 +227,17 @@ static void initialize_game_fsm(void) {
     fsm_on(fsm, TERM_STATE, ALWAYS_TRIGGER, TERM_STATE);
 }
 
-static void terminate_game_fsm(fsm_t *fsm) { fsm_term(fsm); }
-
 game_t *game_init(app_config_t *config) {
     log_debug("Initializing Game");
 
     // --- Application Initializer
     game_t *game = new (game_t);
-    game->app    = app_init(config);
+    game->app    = NULL;
+
+    if (!(game->app = app_init(config))) {
+        game_term(game);
+        return NULL;
+    }
 
     // --- Field Configuration
     int window_width, window_height;
@@ -254,8 +257,13 @@ game_t *game_init(app_config_t *config) {
 }
 
 void game_term(game_t *game) {
-    terminate_game_fsm(fsm);
+    if (!game) {
+        return;
+    }
+    fsm_term(fsm);
     app_term(game->app);
+
+    delete (game);
 }
 
 static void game_process_event(app_t *app, SDL_Event *event) {
@@ -268,6 +276,7 @@ static void game_process_event(app_t *app, SDL_Event *event) {
  * Execute game processing blocks based on current game state.
  */
 static bool game_process_frame(app_t *app, float delta) {
+
     switch (fsm_state(fsm)) {
     case START_STATE: // Start State
         fsm_trigger(fsm, ALWAYS_TRIGGER);

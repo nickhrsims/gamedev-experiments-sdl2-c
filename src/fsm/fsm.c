@@ -58,6 +58,9 @@ static void _transition_table_term(int *transitions) { free(transitions); }
 static void _root_fsm_term(fsm_t *fsm) { free(fsm); }
 
 void fsm_term(fsm_t *fsm) {
+    if (!fsm) {
+        return;
+    }
     _states_term(fsm->states);
     _transition_table_term(fsm->transitions);
     _root_fsm_term(fsm);
