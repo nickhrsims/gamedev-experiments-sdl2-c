@@ -55,6 +55,19 @@ void app_term(app_t *app) {
 void app_run(app_t *app, frame_processor_t process_frame,
              event_processor_t process_event) {
 
+    // --- Validation Checks
+    if (!app) {
+        log_error("Application instance is NULL");
+    }
+
+    if (!process_frame) {
+        log_error("Frame Processor is NULL");
+    }
+
+    if (!process_event) {
+        log_error("Event Processor is NULL");
+    }
+
     // Set running flag.
     app->running = true;
 
@@ -121,4 +134,5 @@ void app_run(app_t *app, frame_processor_t process_frame,
 
     return;
 }
+
 void app_stop(app_t *app) { app->running = false; }
