@@ -34,6 +34,8 @@ cloveunit = dependency('clove-unit', version : '2.4.1')
 exe = executable('pong',
                  'src/app/app.c',
                  'src/app/video.c',
+                 'src/game/actions.c',
+                 'src/game/collision.c',
                  'src/game/game.c',
                  'src/game/field.c',
                  'src/game/player.c',

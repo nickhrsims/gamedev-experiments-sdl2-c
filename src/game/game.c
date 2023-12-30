@@ -10,8 +10,10 @@
 #include "app/video.h"
 
 #include "aabb.h"
+#include "actions.h"
 #include "alloc.h"
 #include "ball.h"
+#include "collision.h"
 #include "entity.h"
 #include "field.h"
 #include "fsm/fsm.h"
@@ -39,6 +41,9 @@ static entity_t ball         = {0};
 static entity_t left_paddle  = {0};
 static entity_t right_paddle = {0};
 static aabb_t field          = {0};
+
+static size_t const entity_count = 3;
+static entity_t *entity_pool[3]  = {&ball, &left_paddle, &right_paddle};
 
 // -----------------------------------------------------------------------------
 // State Machine
@@ -69,58 +74,6 @@ enum game_trigger_enum {
 // -----------------------------------------------------------------------------
 // Game Actions * Input Processing
 // -----------------------------------------------------------------------------
-
-typedef enum {
-    NULL_ACTION,
-    MENU_UP,
-    MENU_DOWN,
-    MENU_LEFT,
-    MENU_RIGHT,
-    P1_UP,
-    P1_DOWN,
-    P2_UP,
-    P2_DOWN,
-    CONFIRM,
-    CANCEL,
-    QUIT,
-    ACTION_COUNT,
-} game_action_t;
-
-static SDL_Scancode game_action_map[ACTION_COUNT] = {
-    [MENU_UP] = SDL_SCANCODE_UP,     [MENU_DOWN] = SDL_SCANCODE_DOWN,
-    [MENU_LEFT] = SDL_SCANCODE_LEFT, [MENU_RIGHT] = SDL_SCANCODE_RIGHT,
-    [P1_UP] = SDL_SCANCODE_A,        [P1_DOWN] = SDL_SCANCODE_Z,
-    [P2_UP] = SDL_SCANCODE_K,        [P2_DOWN] = SDL_SCANCODE_M,
-    [CONFIRM] = SDL_SCANCODE_RETURN, [CANCEL] = SDL_SCANCODE_BACKSPACE,
-    [QUIT] = SDL_SCANCODE_ESCAPE,
-};
-
-static bool game_actions[ACTION_COUNT] = {0};
-
-static void collect_actions_from_keyboard(void) {
-    // Polling is done in app layer
-    uint8_t const *kb = SDL_GetKeyboardState(NULL);
-
-    for (size_t action_index = 0; action_index < ACTION_COUNT; action_index++) {
-        game_actions[action_index] = kb[game_action_map[action_index]];
-    }
-}
-
-static void process_actions(void) {
-    if (game_actions[QUIT]) {
-        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
-    }
-
-    bool p1_up   = game_actions[P1_UP];
-    bool p1_down = game_actions[P1_DOWN];
-    bool p2_up   = game_actions[P2_UP];
-    bool p2_down = game_actions[P2_DOWN];
-
-    entity_set_velocity(&left_paddle, 0, (p1_down - p1_up) * 200);
-    entity_set_velocity(&right_paddle, 0, (p2_down - p2_up) * 200);
-
-    return;
-}
 
 /**
  * Respond to a player receiving a goal.
@@ -199,57 +152,27 @@ static void check_goal_conditions(void) {
     }
 }
 
-// -------------------------------------
-// Per-State Processing Blocks
-// -------------------------------------
+// -----------------------------------------------------------------------------
+// Core Processing Blocks
+// -----------------------------------------------------------------------------
 
-static void collide_entities(size_t entity_count, entity_t *entity_pool[entity_count]) {
-    aabb_t subject_box, collider_box;
-    for (size_t subject_index = 0; subject_index < entity_count; subject_index++) {
-        entity_t *subject = entity_pool[subject_index];
-        entity_get_aabb(subject, &subject_box);
-        for (size_t collider_index = 0; collider_index < entity_count;
-             collider_index++) {
-            if (subject_index == collider_index)
-                continue;
-            entity_t *collider = entity_pool[collider_index];
-            entity_get_aabb(collider, &collider_box);
-            aabb_edge_t intersection =
-                aabb_get_intersection(&subject_box, &collider_box);
-            if (intersection && subject->collide) {
-                subject->collide(subject, collider, intersection);
-            }
-        }
-    }
-}
+static void do_input(void) {
+    game_actions_refresh();
+    bool *actions = game_actions_get();
 
-static void out_of_bounds_collide_entities(size_t entity_count,
-                                           entity_t *entity_pool[entity_count],
-                                           aabb_t *field) {
-    aabb_t subject_box;
-    for (size_t subject_index = 0; subject_index < entity_count; subject_index++) {
-        entity_t *subject = entity_pool[subject_index];
-        entity_get_aabb(subject, &subject_box);
-        if (subject->out_of_bounds) {
-            if (aabb_is_beyond_edge(&subject_box, field, AABB_TOP_EDGE)) {
-                subject->out_of_bounds(subject, AABB_TOP_EDGE);
-            } else if (aabb_is_beyond_edge(&subject_box, field, AABB_BOTTOM_EDGE)) {
-                subject->out_of_bounds(subject, AABB_BOTTOM_EDGE);
-            } else if (aabb_is_beyond_edge(&subject_box, field, AABB_LEFT_EDGE)) {
-                subject->out_of_bounds(subject, AABB_LEFT_EDGE);
-            } else if (aabb_is_beyond_edge(&subject_box, field, AABB_RIGHT_EDGE)) {
-                subject->out_of_bounds(subject, AABB_RIGHT_EDGE);
-            }
-        }
+    if (actions[QUIT]) {
+        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
     }
-}
 
-static void update_entities(size_t entity_count, entity_t *entity_pool[entity_count],
-                            float delta) {
-    for (size_t entity_index = 0; entity_index < entity_count; entity_index++) {
-        entity_t *e = entity_pool[entity_index];
-        e->update(e, delta);
-    }
+    bool p1_up   = actions[P1_UP];
+    bool p1_down = actions[P1_DOWN];
+    bool p2_up   = actions[P2_UP];
+    bool p2_down = actions[P2_DOWN];
+
+    entity_set_velocity(&left_paddle, 0, (p1_down - p1_up) * 200);
+    entity_set_velocity(&right_paddle, 0, (p2_down - p2_up) * 200);
+
+    return;
 }
 
 /**
@@ -257,22 +180,30 @@ static void update_entities(size_t entity_count, entity_t *entity_pool[entity_co
  *
  * TODO: Separate main loop against game loop
  */
-void do_update_process(float delta) {
-    entity_t *entity_pool[3] = {&ball, &left_paddle, &right_paddle};
-    collide_entities(3, entity_pool);
-    out_of_bounds_collide_entities(3, entity_pool, &field);
-    update_entities(3, entity_pool, delta);
+static void do_update(float delta) {
+    // --- Collision
+    collision_process(entity_count, entity_pool);
+    collision_out_of_bounds_process(entity_count, entity_pool, &field);
+
+    // --- Entity Updates
+    for (size_t entity_index = 0; entity_index < entity_count; entity_index++) {
+        entity_t *e = entity_pool[entity_index];
+        e->update(e, delta);
+    }
+
+    // --- Goal Polling
     check_goal_conditions();
 }
+
+static void do_output(app_t *app) { do_graphics_process(app); }
 
 /**
  * Processing block when STATE == PLAYING
  */
 static void do_gameplay_loop(app_t *app, float delta) {
-    collect_actions_from_keyboard();
-    process_actions();
-    do_update_process(delta);
-    do_graphics_process(app);
+    do_input();
+    do_update(delta);
+    do_output(app);
 }
 
 // -------------------------------------
