@@ -57,6 +57,12 @@ void video_reset_color(video_t *video);
 void video_draw_region(video_t *video, int x, int y, int w, int h);
 
 /**
+ * Draw text with specified color.
+ */
+void video_draw_text_with_color(video_t *v, char *str, int x, int y, uint8_t r,
+                                uint8_t g, uint8_t b, uint8_t a);
+
+/**
  * Draw text.
  * TODO: Restore font select.
  *       (can support opaque video via. app passthru API)

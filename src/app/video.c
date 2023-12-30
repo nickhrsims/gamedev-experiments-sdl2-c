@@ -118,11 +118,13 @@ void video_draw_region(video_t *v, int x, int y, int w, int h) {
 }
 
 /**
- * Draw text.
+ * Draw text with specified color.
+ *
+ * TODO: Make text elements first-class citizens with texture properties.
  */
-void video_draw_text(video_t *v, char *str, int x, int y) {
-    SDL_Surface *surface =
-        TTF_RenderText_Solid(v->font, str, (SDL_Color){255, 255, 255, 255});
+void video_draw_text_with_color(video_t *v, char *str, int x, int y, uint8_t r,
+                                uint8_t g, uint8_t b, uint8_t a) {
+    SDL_Surface *surface = TTF_RenderText_Solid(v->font, str, (SDL_Color){r, g, b, a});
 
     SDL_Texture *texture = SDL_CreateTextureFromSurface(v->renderer, surface);
 
@@ -133,6 +135,13 @@ void video_draw_text(video_t *v, char *str, int x, int y) {
                        surface->w,
                        surface->h,
                    });
+}
+
+/**
+ * Draw text.
+ */
+void video_draw_text(video_t *v, char *str, int x, int y) {
+    video_draw_text_with_color(v, str, x, y, 255, 255, 255, 255);
 }
 
 void video_get_window_size(video_t *v, int *w, int *h) {
