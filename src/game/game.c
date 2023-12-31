@@ -57,6 +57,7 @@ enum game_state_enum {
     STATE_GUARD,
     START_STATE,
     PLAYING_STATE,
+    PAUSE_STATE,
     GAME_OVER_STATE,
     TERM_STATE,
     STATE_COUNT,
@@ -68,6 +69,8 @@ enum game_trigger_enum {
     QUIT_GAME_TRIGGER,
     GAME_OVER_TRIGGER,
     ALWAYS_TRIGGER,
+    PAUSE_TRIGGER,
+    RESUME_TRIGGER,
     TRIGGER_COUNT,
 };
 
@@ -98,29 +101,6 @@ static void draw_entities(video_t *video, size_t entity_count,
         entity_t *e = entity_pool[entity_num];
         video_draw_region(video, e->x, e->y, e->w, e->h);
     }
-}
-
-/**
- * Graphics processing block.
- */
-static void do_graphics_process(app_t *app) {
-    static uint8_t SCORE_STRING_LENGTH = 5; // 5 digits + sentinel
-    char p1_score_str[SCORE_STRING_LENGTH + 1];
-    char p2_score_str[SCORE_STRING_LENGTH + 1];
-
-    // TODO: Abstract into itoa-like func for players
-    snprintf(p1_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_1));
-    snprintf(p2_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_2));
-
-    video_clear(app->video);
-    video_set_color(app->video, 255, 255, 255, 255);
-    draw_entities(app->video, 3, (entity_t *[3]){&ball, &left_paddle, &right_paddle});
-    video_draw_text(app->video, p1_score_str, (field.x + field.w) / 2 - 48, 16);
-    video_draw_text(app->video, p2_score_str, (field.x + field.w) / 2 + 48, 16);
-    video_reset_color(app->video);
-    video_render(app->video);
-
-    return;
 }
 
 static void check_goal_conditions(void) {
@@ -162,6 +142,8 @@ static void do_input(void) {
 
     if (actions[QUIT]) {
         fsm_trigger(fsm, QUIT_GAME_TRIGGER);
+    } else if (actions[PAUSE]) {
+        fsm_trigger(fsm, PAUSE_TRIGGER);
     }
 
     bool p1_up   = actions[P1_UP];
@@ -195,12 +177,30 @@ static void do_update(float delta) {
     check_goal_conditions();
 }
 
-static void do_output(app_t *app) { do_graphics_process(app); }
+static void do_output(app_t *app) {
+    static uint8_t SCORE_STRING_LENGTH = 5; // 5 digits + sentinel
+    char p1_score_str[SCORE_STRING_LENGTH + 1];
+    char p2_score_str[SCORE_STRING_LENGTH + 1];
+
+    // TODO: Abstract into itoa-like func for players
+    snprintf(p1_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_1));
+    snprintf(p2_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_2));
+
+    video_reset_color(app->video);
+    video_clear(app->video);
+    video_set_color(app->video, 255, 255, 255, 255);
+    draw_entities(app->video, 3, (entity_t *[3]){&ball, &left_paddle, &right_paddle});
+    video_draw_text(app->video, p1_score_str, (field.x + field.w) / 2 - 48, 16);
+    video_draw_text(app->video, p2_score_str, (field.x + field.w) / 2 + 48, 16);
+    video_render(app->video);
+
+    return;
+}
 
 /**
  * Processing block when STATE == PLAYING
  */
-static void do_gameplay_loop(app_t *app, float delta) {
+static void playing_state_process_frame(app_t *app, float delta) {
     do_input();
     do_update(delta);
     do_output(app);
@@ -219,6 +219,11 @@ static void initialize_game_fsm(void) {
     // Playing
     fsm_on(fsm, PLAYING_STATE, GAME_OVER_TRIGGER, GAME_OVER_STATE);
     fsm_on(fsm, PLAYING_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
+    fsm_on(fsm, PLAYING_STATE, PAUSE_TRIGGER, PAUSE_STATE);
+
+    // Pause State
+    fsm_on(fsm, PAUSE_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
+    fsm_on(fsm, PAUSE_STATE, RESUME_TRIGGER, PLAYING_STATE);
 
     // Game Over
     fsm_on(fsm, GAME_OVER_STATE, ALWAYS_TRIGGER, TERM_STATE);
@@ -272,6 +277,95 @@ static void game_process_event(app_t *app, SDL_Event *event) {
     return;
 }
 
+void start_state_process_frame(app_t *app, float delta) {
+
+    // --- Game Action Inputs
+    game_actions_refresh();
+    bool *actions = game_actions_get();
+
+    if (actions[CONFIRM]) {
+        fsm_trigger(fsm, ALWAYS_TRIGGER);
+    } else if (actions[QUIT]) {
+        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
+    }
+
+    // --- State Actors
+    static unsigned short const speed = 301;
+    static unsigned char alpha        = 100;
+    static float alpha_direction      = speed;
+
+    // --- Animation Update
+    // Bounce Effect
+    if (alpha <= 60) {
+        alpha_direction = speed;
+    } else if (alpha >= 236) {
+        alpha_direction = -speed;
+    }
+    // Animation Driver
+    alpha += alpha_direction * delta;
+
+    // --- Rendering
+    video_reset_color(app->video);
+    video_clear(app->video);
+    video_draw_text_with_color(app->video, "Press Enter", field.x + (field.w / 2),
+                               field.y + (field.h / 2), 255, 255, 255, alpha);
+    video_render(app->video);
+}
+
+static void pause_state_process_frame(app_t *app, float delta) {
+    // --- Game Action Inputs
+    game_actions_refresh();
+    bool *actions = game_actions_get();
+
+    if (actions[CONFIRM]) {
+        fsm_trigger(fsm, RESUME_TRIGGER);
+    } else if (actions[QUIT]) {
+        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
+    }
+
+    // --- State Actors
+    static unsigned short const speed = 301;
+    static unsigned char alpha        = 100;
+    static float alpha_direction      = speed;
+
+    // --- Animation Update
+    // Bounce Effect
+    if (alpha <= 60) {
+        alpha_direction = speed;
+    } else if (alpha >= 236) {
+        alpha_direction = -speed;
+    }
+    // Animation Driver
+    alpha += alpha_direction * delta;
+
+    // --- Extra Rendering
+    static uint8_t SCORE_STRING_LENGTH = 5; // 5 digits + sentinel
+    char p1_score_str[SCORE_STRING_LENGTH + 1];
+    char p2_score_str[SCORE_STRING_LENGTH + 1];
+
+    // TODO: Abstract into itoa-like func for players
+    snprintf(p1_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_1));
+    snprintf(p2_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_2));
+
+    // --- Rendering
+    // Clear Renderer
+    video_reset_color(app->video);
+    video_clear(app->video);
+    // Draw Faded Entities
+    video_set_color(app->video, 90, 90, 90, 90);
+    draw_entities(app->video, 3, (entity_t *[3]){&ball, &left_paddle, &right_paddle});
+    // Fraw Faded Scores
+    video_draw_text_with_color(app->video, p1_score_str, (field.x + field.w) / 2 - 48,
+                               16, 255, 255, 255, 90);
+    video_draw_text_with_color(app->video, p2_score_str, (field.x + field.w) / 2 + 48,
+                               16, 255, 255, 255, 90);
+    // Draw Flashing Pause Text
+    video_draw_text_with_color(app->video, "Paused", field.x + (field.w / 2),
+                               field.y + (field.h / 2), 255, 255, 255, alpha);
+    // Finalize
+    video_render(app->video);
+}
+
 /**
  * Execute game processing blocks based on current game state.
  */
@@ -279,10 +373,13 @@ static void game_process_frame(app_t *app, float delta) {
 
     switch (fsm_state(fsm)) {
     case START_STATE: // Start State
-        fsm_trigger(fsm, ALWAYS_TRIGGER);
+        start_state_process_frame(app, delta);
         break;
     case PLAYING_STATE:
-        do_gameplay_loop(app, delta);
+        playing_state_process_frame(app, delta);
+        break;
+    case PAUSE_STATE:
+        pause_state_process_frame(app, delta);
         break;
     case GAME_OVER_STATE:
         fsm_trigger(fsm, ALWAYS_TRIGGER);

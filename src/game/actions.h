@@ -12,6 +12,7 @@ typedef enum {
   P2_DOWN,
   CONFIRM,
   CANCEL,
+  PAUSE,
   QUIT,
   ACTION_COUNT,
 } game_action_t;
