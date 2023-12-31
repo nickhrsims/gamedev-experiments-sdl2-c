@@ -12,8 +12,8 @@
 #define BALL_VELOCITY_SCALE 300
 
 static void update(entity_t *ball, float delta) {
-    ball->x += (int)(ball->vx * delta);
-    ball->y += (int)(ball->vy * delta);
+    ball->transform.x += (int)(ball->vx * delta);
+    ball->transform.y += (int)(ball->vy * delta);
 }
 
 static void collide(entity_t *self, entity_t *collider, aabb_edge_t edge) {
@@ -58,12 +58,13 @@ void ball_configure(entity_t *ball, aabb_t *field) {
     // --- Position
     int field_center_x = (field->x + field->w) / 2;
     int field_center_y = (field->y + field->h) / 2;
-    entity_set_center_position(ball, field_center_x, field_center_y);
+    aabb_set_center_position(&ball->transform, field_center_x, field_center_y);
 
     // --- Size
     int largest_field_axis = field->w >= field->h ? field->w : field->h;
     int scaled_size        = largest_field_axis / BALL_SIZE_RATIO;
-    entity_set_size(ball, scaled_size, scaled_size); // ball is square
+    ball->transform.w      = scaled_size;
+    ball->transform.h      = scaled_size;
 
     // --- Velocity
     int random_vx = floor(((double)rand() / (double)RAND_MAX) * BALL_VELOCITY_SCALE);

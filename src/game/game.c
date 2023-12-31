@@ -99,7 +99,7 @@ static void draw_entities(video_t *video, size_t entity_count,
                           entity_t *entity_pool[entity_count]) {
     for (size_t entity_num = 0; entity_num < entity_count; entity_num++) {
         entity_t *e = entity_pool[entity_num];
-        video_draw_region(video, e->x, e->y, e->w, e->h);
+        video_draw_region(video, &e->transform);
     }
 }
 
@@ -108,13 +108,13 @@ static void check_goal_conditions(void) {
     static unsigned char const winning_score = 5;
 
     // Is the ball in the left goal?
-    if (field_is_subject_in_left_goal(&field, &ball)) {
+    if (field_is_subject_in_left_goal(&field, &ball.transform)) {
         // player 2 gets the point
         handle_goal(&player_2);
     }
 
     // Is the ball in the right goal?
-    else if (field_is_subject_in_right_goal(&field, &ball)) {
+    else if (field_is_subject_in_right_goal(&field, &ball.transform)) {
         // player 1 gets the point
         handle_goal(&player_1);
     }

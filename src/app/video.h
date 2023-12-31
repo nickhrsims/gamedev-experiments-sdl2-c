@@ -2,6 +2,8 @@
 
 #include "SDL_ttf.h"
 
+#include "aabb.h"
+
 typedef struct video_s video_t;
 
 /**
@@ -54,7 +56,7 @@ void video_reset_color(video_t *video);
 /**
  * Draw an axis-aligned region on the screen.
  */
-void video_draw_region(video_t *video, int x, int y, int w, int h);
+void video_draw_region(video_t *video, aabb_t *region);
 
 /**
  * Draw text with specified color.

@@ -12,8 +12,8 @@
 #define PADDLE_MIN_HEIGHT 128
 
 static void update(entity_t *paddle, float delta) {
-    paddle->x += (int)(paddle->vx * delta);
-    paddle->y += (int)(paddle->vy * delta);
+    paddle->transform.x += (int)(paddle->vx * delta);
+    paddle->transform.y += (int)(paddle->vy * delta);
 }
 
 static void out_of_bounds(entity_t *self, aabb_edge_t edge) {
@@ -89,11 +89,13 @@ void paddle_configure(entity_t *paddle, aabb_t *field, paddle_identifier_t ident
     // --- Position
     int field_section_center_x = field_section.x + field_section.w / 2;
     int field_section_center_y = field_section.y + field_section.h / 2;
-    entity_set_center_position(paddle, field_section_center_x, field_section_center_y);
+    paddle->transform.x        = field_section_center_x;
+    paddle->transform.y        = field_section_center_y;
 
     // --- Size
     // TODO: Scale with field.
-    entity_set_size(paddle, PADDLE_MIN_WIDTH, PADDLE_MIN_HEIGHT); // ball is square
+    paddle->transform.w = PADDLE_MIN_WIDTH;
+    paddle->transform.h = PADDLE_MIN_HEIGHT;
 
     // --- Velocity
     entity_set_velocity(paddle, 0, 0);

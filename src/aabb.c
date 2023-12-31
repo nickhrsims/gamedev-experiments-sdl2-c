@@ -81,3 +81,8 @@ aabb_edge_t aabb_get_intersection(aabb_t *a, aabb_t *b) {
 
     return AABB_NO_EDGE; // Not intersecting
 }
+
+void aabb_set_center_position(aabb_t *aabb, int x, int y) {
+    aabb->x = x + (aabb->w / 2);
+    aabb->y = y + (aabb->h / 2);
+}

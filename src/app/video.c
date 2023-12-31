@@ -112,8 +112,8 @@ void video_reset_color(video_t *g) {
 /**
  * Draw specific axis-aligned region
  */
-void video_draw_region(video_t *v, int x, int y, int w, int h) {
-    SDL_RenderFillRect(v->renderer, &(SDL_Rect){.x = x, .y = y, .w = w, .h = h});
+void video_draw_region(video_t *v, aabb_t *region) {
+    SDL_RenderFillRect(v->renderer, region);
     return;
 }
 

@@ -25,3 +25,8 @@ bool aabb_is_beyond_edge(aabb_t *inner, aabb_t *outer, aabb_edge_t edge);
  * Get edge where `a` most closely overlaps with `b`, or `false` if no overlap.
  */
 aabb_edge_t aabb_get_intersection(aabb_t *a, aabb_t *b);
+
+/**
+ * Set the box center position, rather than "real" position.
+ */
+void aabb_set_center_position(aabb_t *aabb, int x, int y);
