@@ -1,26 +1,54 @@
+#include <string.h>
+
 #include "SDL_keyboard.h"
 #include "SDL_scancode.h"
 
 #include "actions.h"
+#include "alloc.h"
 
-static SDL_Scancode game_action_map[ACTION_COUNT] = {
-    [MENU_UP] = SDL_SCANCODE_UP,     [MENU_DOWN] = SDL_SCANCODE_DOWN,
-    [MENU_LEFT] = SDL_SCANCODE_LEFT, [MENU_RIGHT] = SDL_SCANCODE_RIGHT,
-    [P1_UP] = SDL_SCANCODE_A,        [P1_DOWN] = SDL_SCANCODE_Z,
-    [P2_UP] = SDL_SCANCODE_K,        [P2_DOWN] = SDL_SCANCODE_M,
-    [CONFIRM] = SDL_SCANCODE_RETURN, [CANCEL] = SDL_SCANCODE_BACKSPACE,
-    [PAUSE] = SDL_SCANCODE_P,        [QUIT] = SDL_SCANCODE_ESCAPE,
-};
+typedef action_t scancode_to_action_map_t[SDL_NUM_SCANCODES];
+typedef bool binary_action_state_table_t[ACTION_COUNT];
 
-static bool game_actions[ACTION_COUNT] = {0};
+typedef struct action_table_s {
+    action_table_cfg_t action_to_scancode_map;
+    scancode_to_action_map_t scancode_to_action_map;
+    binary_action_state_table_t binary_action_state_table;
+} action_table_t;
 
-void game_actions_refresh(void) {
-    // Polling is done in app layer
-    uint8_t const *kb = SDL_GetKeyboardState(NULL);
+action_table_t *action_table_init(action_table_cfg_t config) {
+    action_table_t *table = new (action_table_t);
 
-    for (size_t action_index = 0; action_index < ACTION_COUNT; action_index++) {
-        game_actions[action_index] = kb[game_action_map[action_index]];
+    // --- Initialize Primary Table
+    memcpy(table->action_to_scancode_map, config, sizeof(action_table_cfg_t));
+
+    // --- Initialialize Secondary Lookup Table
+    for (action_t action = 0; action < ACTION_COUNT; action++) {
+        table->scancode_to_action_map[table->action_to_scancode_map[action]] = action;
     }
+
+    return table;
 }
 
-bool *game_actions_get(void) { return game_actions; }
+void action_table_term(action_table_t *table) {
+    if (!table) {
+        return;
+    }
+    delete (table);
+}
+
+action_t action_table_get_scancode_action(action_table_t *table,
+                                          SDL_Scancode scancode) {
+    return table->scancode_to_action_map[scancode];
+}
+
+bool *action_table_get_binary_states(action_table_t *table) {
+    // Polling is done in app layer.
+    uint8_t const *kb = SDL_GetKeyboardState(NULL);
+
+    for (size_t action = 0; action < ACTION_COUNT; action++) {
+        table->binary_action_state_table[action] =
+            kb[table->action_to_scancode_map[action]];
+    }
+
+    return table->binary_action_state_table;
+}

@@ -45,6 +45,17 @@ static aabb_t field          = {0};
 static size_t const entity_count = 3;
 static entity_t *entity_pool[3]  = {&ball, &left_paddle, &right_paddle};
 
+static action_table_cfg_t action_table_config = {
+    [MENU_UP] = SDL_SCANCODE_UP,     [MENU_DOWN] = SDL_SCANCODE_DOWN,
+    [MENU_LEFT] = SDL_SCANCODE_LEFT, [MENU_RIGHT] = SDL_SCANCODE_RIGHT,
+    [P1_UP] = SDL_SCANCODE_A,        [P1_DOWN] = SDL_SCANCODE_Z,
+    [P2_UP] = SDL_SCANCODE_K,        [P2_DOWN] = SDL_SCANCODE_M,
+    [CONFIRM] = SDL_SCANCODE_RETURN, [CANCEL] = SDL_SCANCODE_BACKSPACE,
+    [PAUSE] = SDL_SCANCODE_P,        [QUIT] = SDL_SCANCODE_ESCAPE,
+};
+
+static action_table_t *action_table;
+
 // -----------------------------------------------------------------------------
 // State Machine
 // -----------------------------------------------------------------------------
@@ -70,7 +81,6 @@ enum game_trigger_enum {
     GAME_OVER_TRIGGER,
     ALWAYS_TRIGGER,
     PAUSE_TRIGGER,
-    RESUME_TRIGGER,
     TRIGGER_COUNT,
 };
 
@@ -137,14 +147,7 @@ static void check_goal_conditions(void) {
 // -----------------------------------------------------------------------------
 
 static void do_input(void) {
-    game_actions_refresh();
-    bool *actions = game_actions_get();
-
-    if (actions[QUIT]) {
-        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
-    } else if (actions[PAUSE]) {
-        fsm_trigger(fsm, PAUSE_TRIGGER);
-    }
+    bool *actions = action_table_get_binary_states(action_table);
 
     bool p1_up   = actions[P1_UP];
     bool p1_down = actions[P1_DOWN];
@@ -223,7 +226,7 @@ static void initialize_game_fsm(void) {
 
     // Pause State
     fsm_on(fsm, PAUSE_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
-    fsm_on(fsm, PAUSE_STATE, RESUME_TRIGGER, PLAYING_STATE);
+    fsm_on(fsm, PAUSE_STATE, PAUSE_TRIGGER, PLAYING_STATE);
 
     // Game Over
     fsm_on(fsm, GAME_OVER_STATE, ALWAYS_TRIGGER, TERM_STATE);
@@ -255,6 +258,10 @@ game_t *game_init(app_config_t *config) {
     paddle_configure(&left_paddle, &field, LEFT_PADDLE);
     paddle_configure(&right_paddle, &field, RIGHT_PADDLE);
 
+    // --- Action Table
+    action_table = action_table_init(action_table_config);
+
+    // --- FSM
     initialize_game_fsm();
 
     log_debug("Initialization Complete");
@@ -266,6 +273,7 @@ void game_term(game_t *game) {
         return;
     }
     fsm_term(fsm);
+    action_table_term(action_table);
     app_term(game->app);
 
     delete (game);
@@ -273,15 +281,29 @@ void game_term(game_t *game) {
 
 static void game_process_event(app_t *app, SDL_Event *event) {
     (void)app;
-    (void)event;
+
+    if (event->type == SDL_KEYDOWN) {
+        SDL_Scancode scancode = event->key.keysym.scancode;
+        action_t action = action_table_get_scancode_action(action_table, scancode);
+        switch (action) {
+        case PAUSE:
+            fsm_trigger(fsm, PAUSE_TRIGGER);
+            break;
+        case QUIT:
+            fsm_trigger(fsm, QUIT_GAME_TRIGGER);
+            break;
+        default:
+            break;
+        }
+    }
+
     return;
 }
 
 void start_state_process_frame(app_t *app, float delta) {
 
     // --- Game Action Inputs
-    game_actions_refresh();
-    bool *actions = game_actions_get();
+    bool *actions = action_table_get_binary_states(action_table);
 
     if (actions[CONFIRM]) {
         fsm_trigger(fsm, ALWAYS_TRIGGER);
@@ -313,15 +335,6 @@ void start_state_process_frame(app_t *app, float delta) {
 }
 
 static void pause_state_process_frame(app_t *app, float delta) {
-    // --- Game Action Inputs
-    game_actions_refresh();
-    bool *actions = game_actions_get();
-
-    if (actions[CONFIRM]) {
-        fsm_trigger(fsm, RESUME_TRIGGER);
-    } else if (actions[QUIT]) {
-        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
-    }
 
     // --- State Actors
     static unsigned short const speed = 301;

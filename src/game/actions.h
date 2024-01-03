@@ -1,5 +1,10 @@
 #include <stdbool.h>
 
+#include "SDL.h"
+#include "SDL_scancode.h"
+
+// Actions are keyboard only, and only support SDL Scancodes!
+
 typedef enum {
   NULL_ACTION,
   MENU_UP,
@@ -15,7 +20,17 @@ typedef enum {
   PAUSE,
   QUIT,
   ACTION_COUNT,
-} game_action_t;
+} action_t;
 
-void game_actions_refresh(void);
-bool *game_actions_get(void);
+typedef struct action_table_s action_table_t;
+
+typedef SDL_Scancode action_table_cfg_t[ACTION_COUNT];
+
+action_table_t *action_table_init(action_table_cfg_t config);
+
+void action_table_term(action_table_t *table);
+
+action_t action_table_get_scancode_action(action_table_t *table,
+                                          SDL_Scancode scancode);
+
+bool *action_table_get_binary_states(action_table_t *table);
