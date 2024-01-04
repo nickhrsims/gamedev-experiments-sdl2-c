@@ -82,6 +82,8 @@ enum game_trigger_enum {
     ALWAYS_TRIGGER,
     PAUSE_TRIGGER,
     TRIGGER_COUNT,
+    CONFIRM_TRIGGER,
+    CANCEL_TRIGGER,
 };
 
 // -----------------------------------------------------------------------------
@@ -218,6 +220,7 @@ static void initialize_game_fsm(void) {
 
     // Start
     fsm_on(fsm, START_STATE, ALWAYS_TRIGGER, PLAYING_STATE);
+    fsm_on(fsm, START_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
     // Playing
     fsm_on(fsm, PLAYING_STATE, GAME_OVER_TRIGGER, GAME_OVER_STATE);
@@ -229,7 +232,9 @@ static void initialize_game_fsm(void) {
     fsm_on(fsm, PAUSE_STATE, PAUSE_TRIGGER, PLAYING_STATE);
 
     // Game Over
-    fsm_on(fsm, GAME_OVER_STATE, ALWAYS_TRIGGER, TERM_STATE);
+    fsm_on(fsm, GAME_OVER_STATE, CONFIRM_TRIGGER, TERM_STATE);
+    fsm_on(fsm, GAME_OVER_STATE, CANCEL_TRIGGER, TERM_STATE);
+    fsm_on(fsm, GAME_OVER_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
     // Terminating
     fsm_on(fsm, TERM_STATE, ALWAYS_TRIGGER, TERM_STATE);
@@ -379,6 +384,40 @@ static void pause_state_process_frame(app_t *app, float delta) {
     video_render(app->video);
 }
 
+void game_over_state_process_frame(app_t *app, float delta) {
+
+    // --- Game Action Inputs
+    bool *actions = action_table_get_binary_states(action_table);
+
+    if (actions[CONFIRM]) {
+        fsm_trigger(fsm, ALWAYS_TRIGGER);
+    } else if (actions[QUIT] || actions[CANCEL]) {
+        fsm_trigger(fsm, QUIT_GAME_TRIGGER);
+    }
+
+    // --- State Actors
+    static unsigned short const speed = 301;
+    static unsigned char alpha        = 100;
+    static float alpha_direction      = speed;
+
+    // --- Animation Update
+    // Bounce Effect
+    if (alpha <= 60) {
+        alpha_direction = speed;
+    } else if (alpha >= 236) {
+        alpha_direction = -speed;
+    }
+    // Animation Driver
+    alpha += alpha_direction * delta;
+
+    // --- Rendering
+    video_reset_color(app->video);
+    video_clear(app->video);
+    video_draw_text_with_color(app->video, "Game Over", field.x + (field.w / 2),
+                               field.y + (field.h / 2), 255, 255, 255, alpha);
+    video_render(app->video);
+}
+
 /**
  * Execute game processing blocks based on current game state.
  */
@@ -395,7 +434,7 @@ static void game_process_frame(app_t *app, float delta) {
         pause_state_process_frame(app, delta);
         break;
     case GAME_OVER_STATE:
-        fsm_trigger(fsm, ALWAYS_TRIGGER);
+        game_over_state_process_frame(app, delta);
         break;
     case TERM_STATE: // Stop State
         app_stop(app);
