@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdlib.h>
 
 #include "SDL.h"
 
@@ -35,6 +36,14 @@ app_t *app_init(app_config_t *config) {
         log_error("Cannot initialize video sub-system");
         app_term(app);
         return NULL;
+    }
+
+    // --- RNG
+    // Seed RNG
+    srand(time(NULL));
+    // Toss out the first few values.
+    for (int count = 0; count < 1000; count++) {
+        rand();
     }
 
     return app;
