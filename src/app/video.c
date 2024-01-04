@@ -49,6 +49,12 @@ video_t *video_init(video_cfg_t *config) {
         return NULL;
     }
 
+    if (SDL_SetRenderDrawBlendMode(v->renderer, SDL_BLENDMODE_BLEND)) {
+        video_term(v);
+        log_error(SDL_GetError());
+        return NULL;
+    }
+
     // --- Font
     // TODO: Generalize font selection
     if (TTF_Init() < 0) {
