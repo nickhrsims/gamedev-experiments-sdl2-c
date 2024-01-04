@@ -135,6 +135,9 @@ void video_draw_text_with_color(video_t *v, char *str, int x, int y, uint8_t r,
                        surface->w,
                        surface->h,
                    });
+
+    SDL_DestroyTexture(texture);
+    SDL_FreeSurface(surface);
 }
 
 /**
