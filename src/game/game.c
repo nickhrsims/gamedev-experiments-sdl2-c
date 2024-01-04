@@ -35,6 +35,7 @@ typedef struct game_s {
 // -----------------------------------------------------------------------------
 // Game Components
 // -----------------------------------------------------------------------------
+
 static player_t player_1     = {0}; // Players do not need configuration.
 static player_t player_2     = {0}; // Just init to zero and away we go!
 static entity_t ball         = {0};
@@ -45,6 +46,7 @@ static aabb_t field          = {0};
 static size_t const entity_count = 3;
 static entity_t *entity_pool[3]  = {&ball, &left_paddle, &right_paddle};
 
+// Input Configuration
 static action_table_cfg_t action_table_config = {
     [MENU_UP] = SDL_SCANCODE_UP,     [MENU_DOWN] = SDL_SCANCODE_DOWN,
     [MENU_LEFT] = SDL_SCANCODE_LEFT, [MENU_RIGHT] = SDL_SCANCODE_RIGHT,
@@ -54,11 +56,8 @@ static action_table_cfg_t action_table_config = {
     [PAUSE] = SDL_SCANCODE_P,        [QUIT] = SDL_SCANCODE_ESCAPE,
 };
 
+// Action Table (Input Map Instance)
 static action_table_t *action_table;
-
-// -----------------------------------------------------------------------------
-// State Machine
-// -----------------------------------------------------------------------------
 
 // State Machine Handle
 fsm_t *fsm;
@@ -86,136 +85,10 @@ enum game_trigger_enum {
     CANCEL_TRIGGER,
 };
 
-// -----------------------------------------------------------------------------
-// Game Actions * Input Processing
-// -----------------------------------------------------------------------------
-
 /**
- * Respond to a player receiving a goal.
- *
- * NOTE: Very rudimentary implementation.
+ * Configure game-state transition table.
  */
-static void handle_goal(player_t *player) {
-    player_inc_score(player);
-    ball_configure(&ball, &field);
-}
-// -----------------------------------------------------------------------------
-// Gameplay Loop Components
-// -----------------------------------------------------------------------------
-
-/**
- * Draw all entities of given game instance.
- * TODO: Fix via. first-party AABB in app layer.
- */
-static void draw_entities(video_t *video, size_t entity_count,
-                          entity_t *entity_pool[entity_count]) {
-    for (size_t entity_num = 0; entity_num < entity_count; entity_num++) {
-        entity_t *e = entity_pool[entity_num];
-        video_draw_region(video, &e->transform);
-    }
-}
-
-static void check_goal_conditions(void) {
-
-    static unsigned char const winning_score = 5;
-
-    // Is the ball in the left goal?
-    if (field_is_subject_in_left_goal(&field, &ball.transform)) {
-        // player 2 gets the point
-        handle_goal(&player_2);
-    }
-
-    // Is the ball in the right goal?
-    else if (field_is_subject_in_right_goal(&field, &ball.transform)) {
-        // player 1 gets the point
-        handle_goal(&player_1);
-    }
-
-    // TODO: Alter the triggers to relate which player won.
-
-    // Did player 1 win?
-    if (player_get_score(&player_1) >= winning_score) {
-        fsm_trigger(fsm, GAME_OVER_TRIGGER);
-    }
-
-    // Did player 2 win?
-    else if (player_get_score(&player_2) >= winning_score) {
-        fsm_trigger(fsm, GAME_OVER_TRIGGER);
-    }
-}
-
-// -----------------------------------------------------------------------------
-// Core Processing Blocks
-// -----------------------------------------------------------------------------
-
-static void do_input(void) {
-    bool *actions = action_table_get_binary_states(action_table);
-
-    bool p1_up   = actions[P1_UP];
-    bool p1_down = actions[P1_DOWN];
-    bool p2_up   = actions[P2_UP];
-    bool p2_down = actions[P2_DOWN];
-
-    entity_set_velocity(&left_paddle, 0, (p1_down - p1_up) * 200);
-    entity_set_velocity(&right_paddle, 0, (p2_down - p2_up) * 200);
-
-    return;
-}
-
-/**
- * Primary game operations and timing loop.
- *
- * TODO: Separate main loop against game loop
- */
-static void do_update(float delta) {
-    // --- Collision
-    collision_process(entity_count, entity_pool);
-    collision_out_of_bounds_process(entity_count, entity_pool, &field);
-
-    // --- Entity Updates
-    for (size_t entity_index = 0; entity_index < entity_count; entity_index++) {
-        entity_t *e = entity_pool[entity_index];
-        e->update(e, delta);
-    }
-
-    // --- Goal Polling
-    check_goal_conditions();
-}
-
-static void do_output(app_t *app) {
-    static uint8_t SCORE_STRING_LENGTH = 5; // 5 digits + sentinel
-    char p1_score_str[SCORE_STRING_LENGTH + 1];
-    char p2_score_str[SCORE_STRING_LENGTH + 1];
-
-    // TODO: Abstract into itoa-like func for players
-    snprintf(p1_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_1));
-    snprintf(p2_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_2));
-
-    video_reset_color(app->video);
-    video_clear(app->video);
-    video_set_color(app->video, 255, 255, 255, 255);
-    draw_entities(app->video, 3, (entity_t *[3]){&ball, &left_paddle, &right_paddle});
-    video_draw_text(app->video, p1_score_str, (field.x + field.w) / 2 - 48, 16);
-    video_draw_text(app->video, p2_score_str, (field.x + field.w) / 2 + 48, 16);
-    video_render(app->video);
-
-    return;
-}
-
-/**
- * Processing block when STATE == PLAYING
- */
-static void playing_state_process_frame(app_t *app, float delta) {
-    do_input();
-    do_update(delta);
-    do_output(app);
-}
-
-// -------------------------------------
-// Game FSM-Driver
-// -------------------------------------
-
-static void initialize_game_fsm(void) {
+static void configure_fsm(void) {
     fsm = fsm_init(STATE_COUNT, TRIGGER_COUNT, START_STATE);
 
     // Start
@@ -240,72 +113,101 @@ static void initialize_game_fsm(void) {
     fsm_on(fsm, TERM_STATE, ALWAYS_TRIGGER, TERM_STATE);
 }
 
-game_t *game_init(app_config_t *config) {
-    log_debug("Initializing Game");
-
-    // --- Application Initializer
-    game_t *game = new (game_t);
-    game->app    = NULL;
-
-    if (!(game->app = app_init(config))) {
-        game_term(game);
-        return NULL;
+/**
+ * Draw all entities of given game instance.
+ */
+static void draw_entities(video_t *video, size_t entity_count,
+                          entity_t *entity_pool[entity_count]) {
+    for (size_t entity_num = 0; entity_num < entity_count; entity_num++) {
+        entity_t *e = entity_pool[entity_num];
+        video_draw_region(video, &e->transform);
     }
-
-    // --- Field Configuration
-    int window_width, window_height;
-    video_get_window_size(game->app->video, &window_width, &window_height);
-    field.w = window_width;
-    field.h = window_height;
-
-    // --- Entity Configuration
-    ball_configure(&ball, &field);
-    paddle_configure(&left_paddle, &field, LEFT_PADDLE);
-    paddle_configure(&right_paddle, &field, RIGHT_PADDLE);
-
-    // --- Action Table
-    action_table = action_table_init(action_table_config);
-
-    // --- FSM
-    initialize_game_fsm();
-
-    log_debug("Initialization Complete");
-    return game;
 }
 
-void game_term(game_t *game) {
-    if (!game) {
-        return;
-    }
-    fsm_term(fsm);
-    action_table_term(action_table);
-    app_term(game->app);
+static void check_goal_conditions(void) {
 
-    delete (game);
-}
+    static unsigned char const winning_score = 5;
 
-static void game_process_event(app_t *app, SDL_Event *event) {
-    (void)app;
-
-    if (event->type == SDL_KEYDOWN) {
-        SDL_Scancode scancode = event->key.keysym.scancode;
-        action_t action = action_table_get_scancode_action(action_table, scancode);
-        switch (action) {
-        case PAUSE:
-            fsm_trigger(fsm, PAUSE_TRIGGER);
-            break;
-        case QUIT:
-            fsm_trigger(fsm, QUIT_GAME_TRIGGER);
-            break;
-        default:
-            break;
-        }
+    // Is the ball in the left goal?
+    if (field_is_subject_in_left_goal(&field, &ball.transform)) {
+        // player 2 gets the point
+        player_inc_score(&player_2);
+        ball_configure(&ball, &field);
     }
 
-    return;
+    // Is the ball in the right goal?
+    else if (field_is_subject_in_right_goal(&field, &ball.transform)) {
+        // player 1 gets the point
+        player_inc_score(&player_1);
+        ball_configure(&ball, &field);
+    }
+
+    // TODO: Alter the triggers to relate which player won.
+
+    // Did player 1 win?
+    if (player_get_score(&player_1) >= winning_score) {
+        fsm_trigger(fsm, GAME_OVER_TRIGGER);
+    }
+
+    // Did player 2 win?
+    else if (player_get_score(&player_2) >= winning_score) {
+        fsm_trigger(fsm, GAME_OVER_TRIGGER);
+    }
 }
 
-void start_state_process_frame(app_t *app, float delta) {
+// -----------------------------------------------------------------------------
+// Core Processing Blocks
+// -----------------------------------------------------------------------------
+
+/**
+ * Processing block when STATE == PLAYING
+ */
+static void do_playing_state(app_t *app, float delta) {
+    // --- Input
+    bool *actions = action_table_get_binary_states(action_table);
+
+    bool p1_up   = actions[P1_UP];
+    bool p1_down = actions[P1_DOWN];
+    bool p2_up   = actions[P2_UP];
+    bool p2_down = actions[P2_DOWN];
+
+    entity_set_velocity(&left_paddle, 0, (p1_down - p1_up) * 200);
+    entity_set_velocity(&right_paddle, 0, (p2_down - p2_up) * 200);
+
+    // --- Update
+
+    // Collision
+    collision_process(entity_count, entity_pool);
+    collision_out_of_bounds_process(entity_count, entity_pool, &field);
+
+    // Entity Updates
+    for (size_t entity_index = 0; entity_index < entity_count; entity_index++) {
+        entity_t *e = entity_pool[entity_index];
+        e->update(e, delta);
+    }
+
+    // Goal Polling
+    check_goal_conditions();
+
+    // --- Output
+    static uint8_t SCORE_STRING_LENGTH = 5; // 5 digits + sentinel
+    char p1_score_str[SCORE_STRING_LENGTH + 1];
+    char p2_score_str[SCORE_STRING_LENGTH + 1];
+
+    // TODO: Abstract into itoa-like func for players
+    snprintf(p1_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_1));
+    snprintf(p2_score_str, SCORE_STRING_LENGTH, "%hu", player_get_score(&player_2));
+
+    video_reset_color(app->video);
+    video_clear(app->video);
+    video_set_color(app->video, 255, 255, 255, 255);
+    draw_entities(app->video, 3, (entity_t *[3]){&ball, &left_paddle, &right_paddle});
+    video_draw_text(app->video, p1_score_str, (field.x + field.w) / 2 - 48, 16);
+    video_draw_text(app->video, p2_score_str, (field.x + field.w) / 2 + 48, 16);
+    video_render(app->video);
+}
+
+void do_start_state(app_t *app, float delta) {
 
     // --- Game Action Inputs
     bool *actions = action_table_get_binary_states(action_table);
@@ -339,7 +241,7 @@ void start_state_process_frame(app_t *app, float delta) {
     video_render(app->video);
 }
 
-static void pause_state_process_frame(app_t *app, float delta) {
+static void do_pause_state(app_t *app, float delta) {
 
     // --- State Actors
     static unsigned short const speed = 301;
@@ -384,7 +286,7 @@ static void pause_state_process_frame(app_t *app, float delta) {
     video_render(app->video);
 }
 
-void game_over_state_process_frame(app_t *app, float delta) {
+void do_game_over_state(app_t *app, float delta) {
 
     // --- Game Action Inputs
     bool *actions = action_table_get_binary_states(action_table);
@@ -418,23 +320,51 @@ void game_over_state_process_frame(app_t *app, float delta) {
     video_render(app->video);
 }
 
+// -----------------------------------------------------------------------------
+// Game-App Infrastructure
+// -----------------------------------------------------------------------------
+
+/**
+ * Handle incoming game events one at a time.
+ */
+static void handle_event(app_t *app, SDL_Event *event) {
+    (void)app;
+
+    if (event->type == SDL_KEYDOWN) {
+        SDL_Scancode scancode = event->key.keysym.scancode;
+        action_t action = action_table_get_scancode_action(action_table, scancode);
+        switch (action) {
+        case PAUSE:
+            fsm_trigger(fsm, PAUSE_TRIGGER);
+            break;
+        case QUIT:
+            fsm_trigger(fsm, QUIT_GAME_TRIGGER);
+            break;
+        default:
+            break;
+        }
+    }
+
+    return;
+}
+
 /**
  * Execute game processing blocks based on current game state.
  */
-static void game_process_frame(app_t *app, float delta) {
+static void handle_frame(app_t *app, float delta) {
 
     switch (fsm_state(fsm)) {
     case START_STATE: // Start State
-        start_state_process_frame(app, delta);
+        do_start_state(app, delta);
         break;
     case PLAYING_STATE:
-        playing_state_process_frame(app, delta);
+        do_playing_state(app, delta);
         break;
     case PAUSE_STATE:
-        pause_state_process_frame(app, delta);
+        do_pause_state(app, delta);
         break;
     case GAME_OVER_STATE:
-        game_over_state_process_frame(app, delta);
+        do_game_over_state(app, delta);
         break;
     case TERM_STATE: // Stop State
         app_stop(app);
@@ -446,6 +376,57 @@ static void game_process_frame(app_t *app, float delta) {
     }
 }
 
-void game_run(game_t *game) {
-    app_run(game->app, game_process_frame, game_process_event);
+/**
+ * Begin processing of the main game loop.
+ */
+void game_run(game_t *game) { app_run(game->app, handle_frame, handle_event); }
+
+/**
+ * Initialize game instance.
+ */
+game_t *game_init(app_config_t *config) {
+    log_debug("Initializing Game");
+
+    // --- Application Initializer
+    game_t *game = new (game_t);
+    game->app    = NULL;
+
+    if (!(game->app = app_init(config))) {
+        game_term(game);
+        return NULL;
+    }
+
+    // --- Field Configuration
+    int window_width, window_height;
+    video_get_window_size(game->app->video, &window_width, &window_height);
+    field.w = window_width;
+    field.h = window_height;
+
+    // --- Entity Configuration
+    ball_configure(&ball, &field);
+    paddle_configure(&left_paddle, &field, LEFT_PADDLE);
+    paddle_configure(&right_paddle, &field, RIGHT_PADDLE);
+
+    // --- Action Table
+    action_table = action_table_init(action_table_config);
+
+    // --- FSM
+    configure_fsm();
+
+    log_debug("Initialization Complete");
+    return game;
+}
+
+/**
+ * Terminate game instance.
+ */
+void game_term(game_t *game) {
+    if (!game) {
+        return;
+    }
+    fsm_term(fsm);
+    action_table_term(action_table);
+    app_term(game->app);
+
+    delete (game);
 }
