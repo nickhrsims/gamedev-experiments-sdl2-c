@@ -87,6 +87,7 @@ void video_term(video_t *v) {
  * Clear the screen.
  */
 void video_clear(video_t *v) {
+    video_reset_color(v);
     SDL_RenderClear(v->renderer);
     return;
 }
