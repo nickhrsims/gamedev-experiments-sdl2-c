@@ -81,9 +81,9 @@ enum game_trigger_enum {
     GAME_OVER_TRIGGER,
     NEXT_TRIGGER,
     PAUSE_TRIGGER,
-    TRIGGER_COUNT,
     CONFIRM_TRIGGER,
     CANCEL_TRIGGER,
+    TRIGGER_COUNT,
 };
 
 /**
