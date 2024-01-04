@@ -156,26 +156,24 @@ static void check_goal_conditions(void) {
     if (field_is_subject_in_left_goal(&field, &ball.transform)) {
         // player 2 gets the point
         player_inc_score(&player_2);
-        ball_configure(&ball, &field);
+        // Did player 2 win?
+        if (player_get_score(&player_2) >= winning_score) {
+            fsm_trigger(fsm, GAME_OVER_TRIGGER);
+        } else {
+            ball_configure(&ball, &field);
+        }
     }
 
     // Is the ball in the right goal?
     else if (field_is_subject_in_right_goal(&field, &ball.transform)) {
         // player 1 gets the point
         player_inc_score(&player_1);
-        ball_configure(&ball, &field);
-    }
-
-    // TODO: Alter the triggers to relate which player won.
-
-    // Did player 1 win?
-    if (player_get_score(&player_1) >= winning_score) {
-        fsm_trigger(fsm, GAME_OVER_TRIGGER);
-    }
-
-    // Did player 2 win?
-    else if (player_get_score(&player_2) >= winning_score) {
-        fsm_trigger(fsm, GAME_OVER_TRIGGER);
+        // Did player 1 win?
+        if (player_get_score(&player_1) >= winning_score) {
+            fsm_trigger(fsm, GAME_OVER_TRIGGER);
+        } else {
+            ball_configure(&ball, &field);
+        }
     }
 }
 
