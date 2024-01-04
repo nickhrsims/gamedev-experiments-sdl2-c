@@ -67,6 +67,7 @@ enum game_state_enum {
     STATE_GUARD,
     START_STATE,
     COUNTDOWN_STATE,
+    FIELD_SETUP_STATE,
     PLAYING_STATE,
     PAUSE_STATE,
     GAME_OVER_STATE,
@@ -93,28 +94,33 @@ static void configure_fsm(void) {
     fsm = fsm_init(STATE_COUNT, TRIGGER_COUNT, START_STATE);
 
     // Start
-    fsm_on(fsm, START_STATE, NEXT_TRIGGER, COUNTDOWN_STATE);
+    fsm_on(fsm, START_STATE, NEXT_TRIGGER, FIELD_SETUP_STATE);
     fsm_on(fsm, START_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
+
+    // Field Setup
+    fsm_on(fsm, FIELD_SETUP_STATE, NEXT_TRIGGER, COUNTDOWN_STATE);
+    fsm_on(fsm, FIELD_SETUP_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
     // Countdown
     fsm_on(fsm, COUNTDOWN_STATE, NEXT_TRIGGER, PLAYING_STATE);
     fsm_on(fsm, COUNTDOWN_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
     // Playing
+    fsm_on(fsm, PLAYING_STATE, PAUSE_TRIGGER, PAUSE_STATE);
+    fsm_on(fsm, PLAYING_STATE, NEXT_TRIGGER, FIELD_SETUP_STATE);
     fsm_on(fsm, PLAYING_STATE, GAME_OVER_TRIGGER, GAME_OVER_STATE);
     fsm_on(fsm, PLAYING_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
-    fsm_on(fsm, PLAYING_STATE, PAUSE_TRIGGER, PAUSE_STATE);
 
     // Pause State
-    fsm_on(fsm, PAUSE_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
     fsm_on(fsm, PAUSE_STATE, PAUSE_TRIGGER, PLAYING_STATE);
+    fsm_on(fsm, PAUSE_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
     // Game Over
     fsm_on(fsm, GAME_OVER_STATE, CONFIRM_TRIGGER, TERM_STATE);
     fsm_on(fsm, GAME_OVER_STATE, CANCEL_TRIGGER, TERM_STATE);
     fsm_on(fsm, GAME_OVER_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
-    // Terminating
+    // Terminating (Loop-back only)
     fsm_on(fsm, TERM_STATE, NEXT_TRIGGER, TERM_STATE);
 }
 
@@ -150,7 +156,7 @@ static void draw_dimmer(video_t *video) {
 
 static void check_goal_conditions(void) {
 
-    static unsigned char const winning_score = 1;
+    static unsigned char const winning_score = 5;
 
     // Is the ball in the left goal?
     if (field_is_subject_in_left_goal(&field, &ball.transform)) {
@@ -160,7 +166,7 @@ static void check_goal_conditions(void) {
         if (player_get_score(&player_2) >= winning_score) {
             fsm_trigger(fsm, GAME_OVER_TRIGGER);
         } else {
-            ball_configure(&ball, &field);
+            fsm_trigger(fsm, NEXT_TRIGGER);
         }
     }
 
@@ -172,7 +178,7 @@ static void check_goal_conditions(void) {
         if (player_get_score(&player_1) >= winning_score) {
             fsm_trigger(fsm, GAME_OVER_TRIGGER);
         } else {
-            ball_configure(&ball, &field);
+            fsm_trigger(fsm, NEXT_TRIGGER);
         }
     }
 }
@@ -193,6 +199,16 @@ static void handle_player_actions(void) {
 // -----------------------------------------------------------------------------
 // Core Processing Blocks
 // -----------------------------------------------------------------------------
+
+/**
+ * Place the ball and transition
+ */
+static void do_field_setup_state(app_t *app, float delta) {
+    (void)app;
+    (void)delta;
+    ball_configure(&ball, &field);
+    fsm_trigger(fsm, NEXT_TRIGGER);
+}
 
 /**
  * Count down from 3 to 0.
@@ -391,6 +407,9 @@ static void handle_frame(app_t *app, float delta) {
     switch (fsm_state(fsm)) {
     case START_STATE: // Start State
         do_start_state(app, delta);
+        break;
+    case FIELD_SETUP_STATE:
+        do_field_setup_state(app, delta);
         break;
     case COUNTDOWN_STATE:
         do_countdown_state(app, delta);
