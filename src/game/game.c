@@ -66,6 +66,7 @@ fsm_t *fsm;
 enum game_state_enum {
     STATE_GUARD,
     START_STATE,
+    RESET_STATE,
     COUNTDOWN_STATE,
     FIELD_SETUP_STATE,
     PLAYING_STATE,
@@ -94,8 +95,12 @@ static void configure_fsm(void) {
     fsm = fsm_init(STATE_COUNT, TRIGGER_COUNT, START_STATE);
 
     // Start
-    fsm_on(fsm, START_STATE, NEXT_TRIGGER, FIELD_SETUP_STATE);
+    fsm_on(fsm, START_STATE, CONFIRM_TRIGGER, FIELD_SETUP_STATE);
     fsm_on(fsm, START_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
+
+    // Reset
+    fsm_on(fsm, RESET_STATE, NEXT_TRIGGER, FIELD_SETUP_STATE);
+    fsm_on(fsm, RESET_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
     // Field Setup
     fsm_on(fsm, FIELD_SETUP_STATE, NEXT_TRIGGER, COUNTDOWN_STATE);
@@ -116,7 +121,7 @@ static void configure_fsm(void) {
     fsm_on(fsm, PAUSE_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
     // Game Over
-    fsm_on(fsm, GAME_OVER_STATE, CONFIRM_TRIGGER, TERM_STATE);
+    fsm_on(fsm, GAME_OVER_STATE, CONFIRM_TRIGGER, RESET_STATE);
     fsm_on(fsm, GAME_OVER_STATE, CANCEL_TRIGGER, TERM_STATE);
     fsm_on(fsm, GAME_OVER_STATE, QUIT_GAME_TRIGGER, TERM_STATE);
 
@@ -308,6 +313,14 @@ void do_start_state(app_t *app, float delta) {
     video_render(app->video);
 }
 
+static void do_reset_state(app_t *app, float delta) {
+    (void)app;
+    (void)delta;
+    player_1.score = 0;
+    player_2.score = 0;
+    fsm_trigger(fsm, NEXT_TRIGGER);
+}
+
 static void do_pause_state(app_t *app, float delta) {
 
     // --- State Actors
@@ -383,7 +396,7 @@ static void handle_event(app_t *app, SDL_Event *event) {
         action_t action = action_table_get_scancode_action(action_table, scancode);
         switch (action) {
         case CONFIRM:
-            fsm_trigger(fsm, NEXT_TRIGGER);
+            fsm_trigger(fsm, CONFIRM_TRIGGER);
             break;
         case PAUSE:
             fsm_trigger(fsm, PAUSE_TRIGGER);
@@ -407,6 +420,9 @@ static void handle_frame(app_t *app, float delta) {
     switch (fsm_state(fsm)) {
     case START_STATE: // Start State
         do_start_state(app, delta);
+        break;
+    case RESET_STATE:
+        do_reset_state(app, delta);
         break;
     case FIELD_SETUP_STATE:
         do_field_setup_state(app, delta);
