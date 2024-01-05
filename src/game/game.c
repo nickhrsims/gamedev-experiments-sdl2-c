@@ -53,7 +53,7 @@ static action_table_cfg_t action_table_config = {
     [P1_UP] = SDL_SCANCODE_A,        [P1_DOWN] = SDL_SCANCODE_Z,
     [P2_UP] = SDL_SCANCODE_K,        [P2_DOWN] = SDL_SCANCODE_M,
     [CONFIRM] = SDL_SCANCODE_RETURN, [CANCEL] = SDL_SCANCODE_BACKSPACE,
-    [PAUSE] = SDL_SCANCODE_P,        [QUIT] = SDL_SCANCODE_ESCAPE,
+    [PAUSE] = SDL_SCANCODE_P,        [QUIT] = SDL_SCANCODE_Q,
 };
 
 // Action Table (Input Map Instance)
