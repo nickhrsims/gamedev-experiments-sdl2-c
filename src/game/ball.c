@@ -12,47 +12,83 @@
 #define BALL_SIZE_RATIO 40
 
 // --- Velocity Scale (How fast does the ball move?)
-#define BALL_VELOCITY_START     300
-#define BALL_VELOCITY_INCREMENT 20
+#define BALL_VELOCITY_START 300
 
+/** Contains speed data for a ball. */
 typedef struct ball_data_s {
     unsigned short speed;
 } ball_data_t;
 
+/**
+ * Move ball along velocity vector.
+ */
 static void update(entity_t *ball, float delta) {
     ball->transform.x += (int)(ball->vx * delta);
     ball->transform.y += (int)(ball->vy * delta);
 }
 
+/**
+ * Get the difference between ball and paddle vertical position.
+ *
+ * Used to determine angular rotation based upon where the ball strikes the
+ * paddle.
+ */
 double get_normalized_vertical_difference(entity_t *self, entity_t *collider) {
     double vertical_difference   = (double)(self->transform.y - collider->transform.y);
     double normalized_difference = vertical_difference / collider->transform.h;
     return normalized_difference;
 }
 
+/**
+ * Acquire unit vector based on where ball collides with paddle.
+ */
 static void get_collision_vector(entity_t *ball, entity_t *collider, double *vx,
                                  double *vy) {
-    double angular_scalar = get_normalized_vertical_difference(ball, collider);
-    double phi            = (angular_scalar - 0.5) * 90 * M_PI / 180;
 
+    /** Convert degrees to radians. */
+    static double const radians = M_PI / 180;
+
+    /** Range of possible angles. */
+    static short const range = 90;
+
+    /** Between 0 and 1, where along the range is the angle? */
+    double angular_scalar = get_normalized_vertical_difference(ball, collider);
+
+    /** Angle in radians. */
+    double phi = (angular_scalar - 0.5) * range * radians;
+
+    // Set vector based on angle `phi`
     *vx = cos(phi);
     *vy = sin(phi);
 }
 
+/**
+ * Handle special case of paddle collision.
+ */
 static void collide_with_paddle(entity_t *self, entity_t *paddle, aabb_edge_t edge) {
     double vx, vy;
     ball_data_t *data = self->data;
+
+    // Bump speed 10% compounding.
     data->speed *= 1.1;
 
+    // Get new vector based on ball-to-paddle strike location.
     get_collision_vector(self, paddle, &vx, &vy);
+
+    // Adjust for speed.
     entity_set_velocity(self, floor(vx * data->speed), floor(vy * data->speed));
 
-    // It is already moving right.
+    // Invert horizontal direction if necessary.
     if (edge == AABB_RIGHT_EDGE) {
         entity_set_direction(self, DIR_LEFT);
     }
 }
 
+/**
+ * General collision handler.
+ *
+ * Dispatches based on `edge` of collision.
+ */
 static void collide(entity_t *self, entity_t *collider, aabb_edge_t edge) {
     switch (edge) {
     case AABB_LEFT_EDGE:
@@ -74,6 +110,11 @@ static void collide(entity_t *self, entity_t *collider, aabb_edge_t edge) {
     }
 }
 
+/**
+ * General out-of-bounds collision handler.
+ *
+ * Only handles top/bottom out-of-bounds events.
+ */
 static void out_of_bounds(entity_t *self, aabb_edge_t edge) {
     switch (edge) {
     case AABB_TOP_EDGE:
@@ -146,6 +187,11 @@ void ball_configure(entity_t *ball, aabb_t *field) {
     ball->out_of_bounds = out_of_bounds;
 }
 
+/**
+ * Allocate and configure ball.
+ *
+ * WARNING: This is not in use, and has no sister-function for termination.
+ */
 entity_t *ball_init(aabb_t *field) {
     entity_t *ball = entity_init();
     ball_configure(ball, field);
