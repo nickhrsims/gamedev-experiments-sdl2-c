@@ -192,8 +192,8 @@ static void handle_player_actions(void) {
     bool p2_up   = actions[P2_UP];
     bool p2_down = actions[P2_DOWN];
 
-    entity_set_velocity(&left_paddle, 0, (p1_down - p1_up) * 200);
-    entity_set_velocity(&right_paddle, 0, (p2_down - p2_up) * 200);
+    entity_set_velocity(&left_paddle, 0, (p1_down - p1_up) * 400);
+    entity_set_velocity(&right_paddle, 0, (p2_down - p2_up) * 400);
 }
 
 // -----------------------------------------------------------------------------
